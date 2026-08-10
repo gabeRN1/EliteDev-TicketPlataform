@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Interger, String, Enum
+from sqlalchemy import Column, Integer, String, Enum
 from database import Base
-import Enum
+import enum
 
 class RoleEnum(str, enum.Enum):
     organizador = "organizador"
@@ -10,7 +10,7 @@ class RoleEnum(str, enum.Enum):
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Interger, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
     nome = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     senha = Column(String, nullable=False)
