@@ -34,3 +34,23 @@ class Event(Base):
     categoria = Column(String, nullable=False)
     organizador_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     organizador = relationship("User", back_populates="eventos")
+
+class TicketStatus(str, enum.Enum):
+    pendente = "pendente"
+    aprovado = "aprovado"
+    recusado = "recusado"
+    utilizado = "utilizado"
+
+class Ticket(Base):
+    __tablename__ = "tickets"
+
+    id = Column(Integer, primary_key=True, index=True)
+    evento_id = Column(Integer, ForeignKey("events.id"), nullable=False)
+    cliente_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    status = Column(Enum(TicketStatus), default=TicketStatus.pendente, nullable=False)
+    qr_code =  Column(String, nullable=True, unique=True)
+
+    evento = relationship("Event", backref="tickets")
+    cliente = relationship("User", backref="tickets")
+
+

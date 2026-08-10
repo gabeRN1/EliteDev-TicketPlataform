@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel, EmailStr, ConfigDict
-from models import RoleEnum
+from models import RoleEnum, TicketStatus
 
 class UserCreate(BaseModel):
     nome: str
@@ -17,6 +17,13 @@ class UserResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
+class TicketResponse(BaseModel):
+    id: int
+    evento_id: int
+    cliente_id: int
+    status: TicketStatus
+    qr_code: Optional[str] = None
 class LoginRequest(BaseModel):
     email: EmailStr
     senha: str

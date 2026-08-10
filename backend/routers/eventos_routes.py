@@ -8,7 +8,14 @@ import services
 import models
 
 router = APIRouter(prefix="/eventos", tags=["Eventos"])
-
+def check_cliente(current_user: models.User = Depends(get_current_user)):
+    """Verifica se o usuário é cliente"""
+    if current_user.role != models.RoleEnum.cliente:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Acesso negado. Apenas clientes podem reservar ingressos."
+        )
+    return current_user
 def check_organizador(current_user: models.User = Depends(get_current_user)):
     """Verifica usuário é organizador"""
     
@@ -67,3 +74,40 @@ async def listar_catalogo(query: str = None):
 
     resultados = await services.fetch_external_events(query)
     return {"data": resultados}
+
+@router.post("/{event_id}/reservar", response_model=schemas.TicketResponse)
+def reservar_ingresso(
+    event_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(check_cliente)
+):
+    """
+    Reserva um ingresso com trava de concorrência para evitar dupla venda.
+    """
+    event = db.query(models.Event).filter(models.Event.id == event_id).with_for_update().first()
+    
+    if not event:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Evento não encontrado."
+        )
+        
+    if event.ingressos_disponiveis <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ingressos esgotados."
+        )
+        
+    event.ingressos_disponiveis -= 1
+    
+    novo_ticket = models.Ticket(
+        evento_id=event.id,
+        cliente_id=current_user.id,
+        status=models.TicketStatus.pendente
+    )
+    
+    db.add(novo_ticket)
+    db.commit() 
+    db.refresh(novo_ticket)
+    
+    return novo_ticket

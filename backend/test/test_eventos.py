@@ -121,3 +121,51 @@ def test_obter_evento_id_inexistente(client):
     response = client.get("/eventos/999999")
     assert response.status_code == 404
     assert response.json()["detail"] == "Evento não encontrado."
+def test_reservar_ingresso_sucesso(client, token_cliente, token_organizador):
+    """ Devo Permitir que um cliente reservar um ingresso e diminua o estoque."""
+    headers_org = {"Authorization": f"Bearer {token_organizador}"}
+    res_eventos = client.post("/eventos/", json=get_evento_payload(), headers=headers_org)
+    evento_id = res_eventos.json()["id"]
+    estoque_inicial = res_eventos.json()["ingressos_disponiveis"]
+
+    headers_cliente = {"Authorization": f"Bearer {token_cliente}"}
+    res_reserva = client.post(f"/eventos/{evento_id}/reservar", headers=headers_cliente)
+
+    assert res_reserva.status_code == 200
+    data = res_reserva.json()
+    assert data["evento_id"] == evento_id
+    assert data["status"] == "pendente"
+    assert "id" in data
+
+    res_get = client.get(f"/eventos/{evento_id}")
+    estoque_atual = res_get.json()["ingressos_disponiveis"]
+    assert estoque_atual == estoque_inicial - 1
+
+
+def test_reservar_ingresso_organizador_negado(client, token_organizador):
+    """ deve proibir o organizador de comprar o ingresso """
+    headers_org = {"Authorization": f"Bearer {token_organizador}"}
+
+    response = client.post("/eventos/1/reservar", headers=headers_org)
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Acesso negado. Apenas clientes podem reservar ingressos."
+
+
+def test_reservar_ingresso_esgotado(client, token_cliente, token_organizador):
+    """ Devo retornar erro 400 ao tentar reservar um evento sem ingresso """
+    headers_org = {"Authorization": f"Bearer {token_organizador}"}
+    payload = get_evento_payload()
+    payload["ingressos_disponiveis"] = 1
+
+    res_eventos = client.post("/eventos/", json=payload, headers=headers_org)
+    evento_id = res_eventos.json()["id"]
+
+    headers_cliente = {"Authorization": f"Bearer {token_cliente}"}
+    res_reserva_sucesso = client.post(f"/eventos/{evento_id}/reservar", headers=headers_cliente)
+    assert res_reserva_sucesso.status_code == 200
+
+    res_reserva_falha = client.post(f"/eventos/{evento_id}/reservar", headers=headers_cliente)
+
+    assert res_reserva_falha.status_code == 400
+    assert res_reserva_falha.json()["detail"] == "Ingressos esgotados."
