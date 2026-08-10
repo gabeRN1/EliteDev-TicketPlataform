@@ -8,7 +8,7 @@ import services
 import models
 import random
 import hmac
-
+# Separar rotas por role para cliente, organizaodr e portaria
 router = APIRouter(prefix="/eventos", tags=["Eventos"])
 
 def check_cliente(current_user: models.User = Depends(get_current_user)):
@@ -222,3 +222,30 @@ def compartilhar_evento_cliente(
         "link": link_publico,
         "mensagem_sugerida": texto_whatsapp
     }
+
+@router.get("/meus-eventos", response_model=List[schemas.EventResponse])
+def listar_meus_eventos(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(check_organizador)
+):
+    """
+    Retorna todos os eventos criados pelo organizador logado.
+    Ideal para o 'Painel do Organizador' no frontend.
+    """
+    eventos = db.query(models.Event).filter(models.Event.organizador_id == current_user.id).all()
+    
+    return eventos
+
+
+@router.get("/ingressos/meus-ingressos", response_model=List[schemas.TicketResponse])
+def listar_meus_ingressos(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(check_cliente)
+):
+    """
+    Retorna todos os ingressos pertencentes ao cliente logado.
+    Ideal para a tela 'Meus Ingressos' no aplicativo/site do cliente.
+    """
+    ingressos = db.query(models.Ticket).filter(models.Ticket.cliente_id == current_user.id).all()
+    
+    return ingressos
