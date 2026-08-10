@@ -169,3 +169,97 @@ def test_reservar_ingresso_esgotado(client, token_cliente, token_organizador):
 
     assert res_reserva_falha.status_code == 400
     assert res_reserva_falha.json()["detail"] == "Ingressos esgotados."
+
+@pytest.fixture
+def token_portaria(client):
+    """Cria e autentica um usuário Portaria, retornando o token JWT."""
+    client.post(
+        "/auth/register",
+        json={
+            "nome": "Portaria Teste",
+            "email": "portaria_test@elitedev.com",
+            "senha": "senha_portaria",
+            "role": "portaria"
+        }
+    )
+    response = client.post(
+        "/auth/login",
+        json={"email": "portaria_test@elitedev.com", "senha": "senha_portaria"}
+    )
+    return response.json()["access_token"]
+def test_portaria_acesso_negado_cliente(client, token_cliente):
+    """Deve impedir que um Cliente tente validar um QR Code na portaria."""
+    headers_cliente = {"Authorization": f"Bearer {token_cliente}"}
+    
+    payload = {"evento_id": 1, "qr_code": "qr-1-1-hashfake"}
+    
+    response = client.post("/eventos/portaria/validar", json=payload, headers=headers_cliente)
+    
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Acesso negado. Apenas usuários da portaria podem validar ingressos."
+
+
+def test_portaria_acesso_negado_organizador(client, token_organizador):
+    """Deve impedir que um Organizador tente validar um QR Code na portaria."""
+    headers_org = {"Authorization": f"Bearer {token_organizador}"}
+    
+    payload = {"evento_id": 1, "qr_code": "qr-1-1-hashfake"}
+    
+    response = client.post("/eventos/portaria/validar", json=payload, headers=headers_org)
+    
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Acesso negado. Apenas usuários da portaria podem validar ingressos."
+
+def test_compartilhar_evento_sucesso(client, token_cliente, token_organizador):
+    headers_org = {"Authorization": f"Bearer {token_organizador}"}
+    res_evento = client.post("/eventos/", json=get_evento_payload(), headers=headers_org)
+    evento_id = res_evento.json()["id"]
+
+    headers_cliente = {"Authorization": f"Bearer {token_cliente}"}
+    res_share = client.get(f"/eventos/{evento_id}/compartilhar", headers=headers_cliente)
+
+    assert res_share.status_code == 200
+    data = res_share.json()
+    assert "link" in data
+    assert "mensagem_sugerida" in data
+    assert data["evento"] == get_evento_payload()["titulo"]
+    assert "Bora também?" in data["mensagem_sugerida"]
+
+
+def test_compartilhar_evento_negado_organizador(client, token_organizador):
+    headers_org = {"Authorization": f"Bearer {token_organizador}"}
+    
+    res_evento = client.post("/eventos/", json=get_evento_payload(), headers=headers_org)
+    evento_id = res_evento.json()["id"]
+
+    res_share = client.get(f"/eventos/{evento_id}/compartilhar", headers=headers_org)
+
+    assert res_share.status_code == 403
+    assert "Acesso negado" in res_share.json()["detail"]
+
+def test_compartilhar_evento_sucesso(client, token_cliente, token_organizador):
+    headers_org = {"Authorization": f"Bearer {token_organizador}"}
+    res_evento = client.post("/eventos/", json=get_evento_payload(), headers=headers_org)
+    evento_id = res_evento.json()["id"]
+
+    headers_cliente = {"Authorization": f"Bearer {token_cliente}"}
+    res_share = client.get(f"/eventos/{evento_id}/compartilhar", headers=headers_cliente)
+
+    assert res_share.status_code == 200
+    data = res_share.json()
+    assert "link" in data
+    assert "mensagem_sugerida" in data
+    assert data["evento"] == get_evento_payload()["titulo"]
+    assert "Bora também?" in data["mensagem_sugerida"]
+
+
+def test_compartilhar_evento_negado_organizador(client, token_organizador):
+    headers_org = {"Authorization": f"Bearer {token_organizador}"}
+    
+    res_evento = client.post("/eventos/", json=get_evento_payload(), headers=headers_org)
+    evento_id = res_evento.json()["id"]
+
+    res_share = client.get(f"/eventos/{evento_id}/compartilhar", headers=headers_org)
+
+    assert res_share.status_code == 403
+    assert "Acesso negado" in res_share.json()["detail"]

@@ -52,3 +52,8 @@ class EventResponse(EventBase):
     organizador_id: int
     
     model_config = ConfigDict(from_attributes=True)
+
+class ValidarRequest(BaseModel):
+    evento_id: int
+    qr_code: str
+

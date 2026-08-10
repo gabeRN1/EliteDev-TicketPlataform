@@ -7,6 +7,7 @@ import schemas
 import services
 import models
 import random
+import hmac
 
 router = APIRouter(prefix="/eventos", tags=["Eventos"])
 
@@ -18,15 +19,14 @@ def check_cliente(current_user: models.User = Depends(get_current_user)):
             detail="Acesso negado. Apenas clientes podem reservar ingressos."
         )
     return current_user
+
 def check_organizador(current_user: models.User = Depends(get_current_user)):
     """Verifica usuário é organizador"""
-    
     if current_user.role != models.RoleEnum.organizador:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Acesso negado. Apenas organizadores podem criar eventos."
         )
-    
     return current_user
 
 @router.post("/", response_model=schemas.EventResponse, status_code=status.HTTP_201_CREATED)
@@ -73,7 +73,6 @@ async def listar_catalogo(query: str = None):
     """
     Rota do organizador buscar os eventos
     """
-
     resultados = await services.fetch_external_events(query)
     return {"data": resultados}
 
@@ -117,7 +116,6 @@ def reservar_ingresso(
 @router.post("/ingressos/{ticket_id}/checkout",response_model=schemas.TicketResponse)
 def checkout_simulado(ticket_id: int, db: Session = Depends(get_db),current_user: models.User = Depends(check_cliente)):
     """ Simula o pagamento de uma reserva aprova boa parte do tempo mas rescusa aleatoriamente para testar o fluxo """
-
     ticket = db.query(models.Ticket).filter(models.Ticket.id == ticket_id, models.Ticket.cliente_id == current_user.id).with_for_update().first()
 
     if not ticket:
@@ -126,7 +124,7 @@ def checkout_simulado(ticket_id: int, db: Session = Depends(get_db),current_user
     if ticket.status != models.TicketStatus.pendente:
         raise HTTPException(status_code=400, detail=f"Este ingresso não está disponivel")
 
-    pagamento_aprovado = random.choices(True, False, weights=[0.8, 0.2][0])
+    pagamento_aprovado = random.choices([True, False], weights=[0.8, 0.2])[0]
 
     if pagamento_aprovado:
         ticket.status = models.TicketStatus.aprovado
@@ -135,10 +133,92 @@ def checkout_simulado(ticket_id: int, db: Session = Depends(get_db),current_user
         ticket.status = models.TicketStatus.recusado
         evento = db.query(models.Event).filter(models.Event.id == ticket.evento_id).first()
     
-    if evento:
-        evento.ingressos_disponiveis += 1
+        if evento:
+            evento.ingressos_disponiveis += 1
     
     db.commit()
     db.refresh(ticket)
 
     return ticket
+
+def check_portaria(current_user: models.User = Depends(get_current_user)):
+    if current_user.role != models.RoleEnum.portaria:
+        raise HTTPException(
+            status_code=403,
+            detail="Acesso negado. Apenas usuários da portaria podem validar ingressos."
+        )
+    return current_user
+
+@router.post("/portaria/validar")
+def validar_ingresso(
+    req: schemas.ValidarRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(check_portaria)    
+):
+    partes = req.qr_code.split("-")
+    if len(partes) != 4 or partes[0] != "qr":
+        raise HTTPException(status_code=400, detail="QR Code inválido (formato incorreto)")
+    
+    try:
+        ticket_id = int(partes[1])
+        evento_id_qr = int(partes[2])
+    except ValueError:
+        raise HTTPException(status_code=400, detail="QR code inválido (corrompido)")
+    
+    qr_esperado = gerar_qr_code(ticket_id, evento_id_qr)
+
+    if not hmac.compare_digest(req.qr_code, qr_esperado):
+        raise HTTPException(status_code=400, detail="QR Code inválido (assinatura forjada)")
+    
+    if evento_id_qr != req.evento_id:
+        raise HTTPException(status_code=400, detail="Evento errado. Este ingresso é de outro evento")
+    
+    ticket = db.query(models.Ticket).filter(models.Ticket.id == ticket_id).with_for_update().first()
+
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ingresso não encontrado no sistema")
+
+    if ticket.status == models.TicketStatus.utilizado:
+        raise HTTPException(status_code=400, detail="Ingresso já utilizado.")
+    elif ticket.status != models.TicketStatus.aprovado:
+        raise HTTPException(status_code=400, detail=f"Ingresso inválido. Status atual: {ticket.status.value}.")
+
+    ticket.status = models.TicketStatus.utilizado
+    db.commit()
+    db.refresh(ticket)
+
+    return {
+        "mensagem": "Entrada Liberada",
+        "ticket_id": ticket.id,
+        "status": ticket.status
+    }
+
+@router.get("/{event_id}/compartilhar")
+def compartilhar_evento_cliente(
+    event_id: int, 
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(check_cliente)
+):
+    """
+    Gera um link e texto para o cliente compartilhar o evento.
+    Acesso restrito apenas a clientes.
+    """
+    evento = db.query(models.Event).filter(models.Event.id == event_id).first()
+    
+    if not evento:
+        raise HTTPException(status_code=404, detail="Evento não encontrado")
+        
+    # URL  do frontend
+    link_publico = f"https://site.com/eventos/{evento.id}"
+    
+    texto_whatsapp = (
+        f"E aí! Eu vou no evento '{evento.titulo}' no dia {evento.data_evento}! "
+        f"Ainda tem {evento.ingressos_disponiveis} ingressos disponíveis. "
+        f"Bora também? Compre o seu aqui: {link_publico}"
+    )
+
+    return {
+        "evento": evento.titulo,
+        "link": link_publico,
+        "mensagem_sugerida": texto_whatsapp
+    }
