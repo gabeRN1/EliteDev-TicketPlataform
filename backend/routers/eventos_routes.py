@@ -2,12 +2,14 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database import get_db
-from security import get_current_user
+from security import get_current_user, gerar_qr_code
 import schemas
 import services
 import models
+import random
 
 router = APIRouter(prefix="/eventos", tags=["Eventos"])
+
 def check_cliente(current_user: models.User = Depends(get_current_user)):
     """Verifica se o usuário é cliente"""
     if current_user.role != models.RoleEnum.cliente:
@@ -111,3 +113,32 @@ def reservar_ingresso(
     db.refresh(novo_ticket)
     
     return novo_ticket
+
+@router.post("/ingressos/{ticket_id}/checkout",response_model=schemas.TicketResponse)
+def checkout_simulado(ticket_id: int, db: Session = Depends(get_db),current_user: models.User = Depends(check_cliente)):
+    """ Simula o pagamento de uma reserva aprova boa parte do tempo mas rescusa aleatoriamente para testar o fluxo """
+
+    ticket = db.query(models.Ticket).filter(models.Ticket.id == ticket_id, models.Ticket.cliente_id == current_user.id).with_for_update().first()
+
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Reserva não encontrada")
+    
+    if ticket.status != models.TicketStatus.pendente:
+        raise HTTPException(status_code=400, detail=f"Este ingresso não está disponivel")
+
+    pagamento_aprovado = random.choices(True, False, weights=[0.8, 0.2][0])
+
+    if pagamento_aprovado:
+        ticket.status = models.TicketStatus.aprovado
+        ticket.qr_code =  gerar_qr_code(ticket.id, ticket.evento_id)
+    else:
+        ticket.status = models.TicketStatus.recusado
+        evento = db.query(models.Event).filter(models.Event.id == ticket.evento_id).first()
+    
+    if evento:
+        evento.ingressos_disponiveis += 1
+    
+    db.commit()
+    db.refresh(ticket)
+
+    return ticket
