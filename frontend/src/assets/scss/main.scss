@@ -1,0 +1,81 @@
+@charset "utf-8";
+
+// 1. Cores extraídas da paleta fornecida
+$brand-light-blue: #3CA2EE; 
+$brand-blue:       #007CF8; 
+$brand-deep-blue:  #3C49EE;
+$brand-purple:     #6844EF;
+$brand-magenta:    #883CEE;
+
+// Fundo escuro inspirado na imagem de referência do layout
+$brand-dark:       #0B0F19; 
+$brand-surface:    #151B2B;
+
+// 2. Mapeamento do Bulma
+$primary: $brand-blue;
+
+$link: $brand-light-blue;
+$link-hover: darken($brand-light-blue, 10%);
+
+// Mantido vermelho padrão apenas para ações destrutivas/erros
+$danger: #EF4444; 
+
+$dark: $brand-dark;
+
+$scheme-main: $brand-dark; 
+$text: #F9FAFB; // Texto claro para contraste        
+
+@import "bulma/bulma";
+
+// 3. Estilos Base
+.navbar {
+  background-color: $scheme-main;
+}
+
+// Remove os blocos quadrados e aplica hover arredondado
+.navbar-item, .navbar-link {
+  color: $text !important;
+  border-radius: 8px; // Deixa o elemento preparado para um fundo arredondado
+  margin: 2px 4px; // Adiciona um respiro para o hover não grudar nas bordas
+  transition: all 0.2s ease;
+  
+  &:hover, &:focus {
+    color: $brand-light-blue !important;
+    background-color: $brand-surface !important;
+    border-radius: 8px !important; // Força o hover a ser arredondado
+  }
+}
+
+// Ajuste para o dropdown interno (menu de cidades) não ficar quadrado
+.navbar-dropdown {
+  background-color: $brand-surface;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 8px;
+
+  .navbar-item {
+    border-radius: 6px;
+    margin: 2px 0;
+    
+    &:hover {
+      background-color: lighten($brand-surface, 5%) !important;
+    }
+  }
+}
+
+// Oculta a seta quadrada padrão do Bulma nos dropdowns
+.navbar-link:not(.is-arrowless)::after {
+  display: none !important;
+}
+
+// Customizações globais para os cards no tema escuro
+.card {
+  background-color: $brand-surface;
+  border-radius: 12px; // Arredondamento suave para os cards também
+  border: none;
+  overflow: hidden;
+}
+
+.title, .subtitle {
+  color: $text !important;
+}
