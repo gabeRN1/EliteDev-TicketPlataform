@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { API_URL } from '../../config';
+import Icon from '../../components/Icon';
 
 const formatadorMoeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -44,7 +45,7 @@ export default function Checkout() {
     }
 
     const token = localStorage.getItem('token');
-    
+
     if (!token) {
       setMensagemErro("Você precisa estar logado para comprar ingressos.");
       setStatus('error');
@@ -83,7 +84,7 @@ export default function Checkout() {
         }
 
         const ticketComprado = await resCheckout.json();
-        
+
         if (ticketComprado.status === "recusado") {
           throw new Error(`O pagamento do assento ${assento} foi recusado pela operadora.`);
         }
@@ -100,24 +101,37 @@ export default function Checkout() {
     }
   };
 
-  const inputStyle = { 
-    backgroundColor: 'rgba(255, 255, 255, 0.05)', 
-    borderColor: 'rgba(255, 255, 255, 0.1)', 
-    color: 'white' 
-  };
-
   if (status === 'success') {
     return (
-      <div className="section has-text-centered pt-6">
-        <div className="container" style={{ maxWidth: '500px' }}>
-          <div className="box p-6" style={{ backgroundColor: 'var(--bg-surface)' }}>
-            <span className="icon is-large has-text-success mb-4" style={{ transform: 'scale(3)' }}>✓</span>
-            <h1 className="title is-3 mb-2 mt-4">Pagamento Aprovado!</h1>
-            <p className="subtitle is-6 has-text-grey mb-5">
-              Seus ingressos para <strong>{evento.titulo}</strong> foram confirmados.
+      <div className="section pt-6">
+        <div className="container px-4" style={{ maxWidth: '520px' }}>
+          <div className="tp-panel p-6 tp-hard">
+            <span
+              className="is-flex is-align-items-center is-justify-content-center mb-5"
+              style={{
+                width: '44px',
+                height: '44px',
+                border: '1px solid var(--green)',
+                color: 'var(--green)'
+              }}
+            >
+              <Icon name="check" size={22} />
+            </span>
+
+            <p className="tp-eyebrow mb-2" style={{ color: 'var(--green)' }}>Pagamento aprovado</p>
+            <h1 className="title is-3 tp-display mb-3">Tudo certo.</h1>
+            <p className="tp-muted mb-5">
+              Seus ingressos para <strong style={{ color: 'var(--text-primary)' }}>{evento.titulo}</strong> foram confirmados
+              e já estão disponíveis com QR Code.
             </p>
-            <Link to="/meus-ingressos" className="button is-link is-fullwidth">
-              Ver Meus Ingressos
+
+            <Link
+              to="/meus-ingressos"
+              className="button tp-btn-primary tp-btn-label is-fullwidth is-flex is-align-items-center is-justify-content-center"
+              style={{ gap: '10px', height: '46px' }}
+            >
+              Ver meus ingressos
+              <Icon name="arrowRight" size={15} />
             </Link>
           </div>
         </div>
@@ -128,82 +142,88 @@ export default function Checkout() {
   return (
     <div className="section pt-5">
       <div className="container px-4">
-        <h1 className="title is-3 mb-5">Finalizar Compra</h1>
-        
+
+        <p className="tp-eyebrow mb-2">Checkout · Pagamento</p>
+        <h1 className="title is-2 tp-display mb-5">Finalizar compra</h1>
+
         <div className="columns is-variable is-6">
+
           <div className="column is-7">
-            <div className="card p-5" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '12px' }}>
-              <h2 className="title is-5 mb-4">Dados do Cartão</h2>
-              
+            <div className="tp-panel p-5">
+              <div className="tp-rule">
+                <span className="tp-eyebrow">Dados do cartão</span>
+              </div>
+
               {status === 'error' && (
-                <div className="notification is-danger is-light mb-4">
-                  {mensagemErro}
+                <div className="notification is-danger is-light mb-4 is-flex is-align-items-center" style={{ gap: '10px' }}>
+                  <Icon name="alert" size={16} />
+                  <span className="is-size-7">{mensagemErro}</span>
                 </div>
               )}
 
               <form onSubmit={handlePagamento}>
-                <div className="field mb-4">
-                  <label className="label is-size-7" style={{ color: 'var(--text-secondary)' }}>Nome Impresso no Cartão</label>
+                <div className="field tp-field">
+                  <label className="label" htmlFor="ck-nome">Nome impresso no cartão</label>
                   <div className="control">
-                    <input 
-                      className="input" 
-                      type="text" 
+                    <input
+                      id="ck-nome"
+                      className="input tp-mono"
+                      type="text"
                       name="nome"
-                      placeholder="JOÃO DA SILVA" 
-                      style={inputStyle} 
-                      required 
+                      placeholder="JOÃO DA SILVA"
+                      required
                       value={dadosCartao.nome}
                       onChange={handleInputChange}
                     />
                   </div>
                 </div>
 
-                <div className="field mb-4">
-                  <label className="label is-size-7" style={{ color: 'var(--text-secondary)' }}>Número do Cartão</label>
+                <div className="field tp-field">
+                  <label className="label" htmlFor="ck-numero">Número do cartão</label>
                   <div className="control">
-                    <input 
-                      className="input" 
-                      type="text" 
+                    <input
+                      id="ck-numero"
+                      className="input tp-mono"
+                      type="text"
                       name="numero"
-                      placeholder="0000 0000 0000 0000" 
+                      placeholder="0000 0000 0000 0000"
                       maxLength="19"
-                      style={inputStyle} 
-                      required 
+                      required
                       value={dadosCartao.numero}
                       onChange={handleInputChange}
                     />
                   </div>
                 </div>
 
-                <div className="columns is-mobile">
-                  <div className="column field mb-0">
-                    <label className="label is-size-7" style={{ color: 'var(--text-secondary)' }}>Validade</label>
+                <div className="tp-grid tp-grid-2">
+                  <div className="field mb-0">
+                    <label className="label" htmlFor="ck-validade">Validade</label>
                     <div className="control">
-                      <input 
-                        className="input" 
-                        type="text" 
+                      <input
+                        id="ck-validade"
+                        className="input tp-mono"
+                        type="text"
                         name="validade"
-                        placeholder="MM/AA" 
+                        placeholder="MM/AA"
                         maxLength="5"
-                        style={inputStyle} 
-                        required 
+                        required
                         value={dadosCartao.validade}
                         onChange={handleInputChange}
                       />
                     </div>
                   </div>
 
-                  <div className="column field mb-0">
-                    <label className="label is-size-7" style={{ color: 'var(--text-secondary)' }}>CVV</label>
+                  <div className="field mb-0">
+                    <label className="label" htmlFor="ck-cvv">CVV</label>
                     <div className="control">
-                      <input 
-                        className="input" 
-                        type="text" 
+                      <input
+                        id="ck-cvv"
+                        className="input tp-mono"
+                        type="text"
                         name="cvv"
-                        placeholder="123" 
+                        placeholder="123"
                         maxLength="4"
-                        style={inputStyle} 
-                        required 
+                        required
                         value={dadosCartao.cvv}
                         onChange={handleInputChange}
                       />
@@ -211,27 +231,45 @@ export default function Checkout() {
                   </div>
                 </div>
 
-                <button 
-                  type="submit" 
-                  className={`button is-warning is-fullwidth mt-5 has-text-weight-bold ${loading ? 'is-loading' : ''}`}
-                  style={{ backgroundColor: '#FFD700', border: 'none', color: '#000' }}
+                <button
+                  type="submit"
+                  className={`button tp-btn-primary tp-btn-label is-fullwidth mt-5 ${loading ? 'is-loading' : ''}`}
+                  style={{ height: '48px' }}
                   disabled={loading}
                 >
                   Pagar {formatadorMoeda.format(total)}
                 </button>
+
+                <p className="tp-mono is-size-7 tp-dim mt-3 is-flex is-align-items-center" style={{ gap: '8px' }}>
+                  <Icon name="shield" size={14} />
+                  Transação processada em ambiente seguro
+                </p>
               </form>
             </div>
           </div>
 
           <div className="column is-5">
-            <div className="box" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '12px' }}>
-              <h2 className="title is-5 mb-4">Resumo do Pedido</h2>
-              <p className="has-text-weight-bold">{evento.titulo}</p>
-              <p className="is-size-7 has-text-grey mt-1">Assentos selecionados: {assentos.join(', ')}</p>
-              <hr style={{ backgroundColor: 'var(--border-color)' }} />
-              <div className="is-flex is-justify-content-space-between is-align-items-center">
-                <span className="has-text-weight-bold">Total</span>
-                <span className="title is-4 mb-0 has-text-link">{formatadorMoeda.format(total)}</span>
+            <div className="tp-panel">
+              <div className="p-4" style={{ borderBottom: '1px dashed var(--line-strong)' }}>
+                <p className="tp-eyebrow mb-3">Resumo do pedido</p>
+                <p className="title is-5 mb-2">{evento.titulo}</p>
+                <p className="tp-mono is-size-7 tp-muted">{evento.local}</p>
+              </div>
+
+              <div className="p-4" style={{ borderBottom: '1px solid var(--line)' }}>
+                <div className="is-flex is-justify-content-space-between mb-2">
+                  <span className="tp-eyebrow" style={{ fontSize: '0.625rem' }}>Assentos</span>
+                  <span className="tp-mono is-size-7">{assentos.join(' · ')}</span>
+                </div>
+                <div className="is-flex is-justify-content-space-between">
+                  <span className="tp-eyebrow" style={{ fontSize: '0.625rem' }}>Quantidade</span>
+                  <span className="tp-mono is-size-7">{String(assentos.length).padStart(2, '0')}</span>
+                </div>
+              </div>
+
+              <div className="p-4 is-flex is-justify-content-space-between is-align-items-flex-end">
+                <span className="tp-eyebrow" style={{ fontSize: '0.625rem' }}>Total</span>
+                <span className="tp-metric-value">{formatadorMoeda.format(total)}</span>
               </div>
             </div>
           </div>

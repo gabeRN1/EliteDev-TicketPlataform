@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { API_URL } from '../config';
+import Icon from '../components/Icon';
 
 export default function PortariaHome({ usuario, eventoId = 1 }) {
   const porteiro = usuario || {
@@ -129,83 +130,136 @@ export default function PortariaHome({ usuario, eventoId = 1 }) {
     switch (status) {
       case 'aprovado':
       case 'pago':
-        return { headerBg: '#064E3B', btnClass: 'is-success', title: 'Acesso Liberado' };
+        return { accent: 'var(--green)', icon: 'check', title: 'Acesso Liberado' };
       case 'pendente':
-        return { headerBg: '#78350F', btnClass: 'is-warning', title: 'Aguardando Pagamento' };
+        return { accent: 'var(--amber)', icon: 'alert', title: 'Aguardando Pagamento' };
       case 'cancelado':
       case 'utilizado':
       case 'invalido':
       default:
-        return { headerBg: '#7F1D1D', btnClass: 'is-danger', title: 'Acesso Negado' };
+        return { accent: 'var(--red)', icon: 'close', title: 'Acesso Negado' };
     }
   };
 
   const modalConfig = getModalConfig(resultadoValidacao?.status);
 
   return (
-    <div className="section pt-4" style={{ minHeight: 'calc(100vh - 80px)' }}>
-      <div className="container px-4" style={{ maxWidth: '680px' }}>
-        
-        <div className="box mb-4 p-4" style={{ backgroundColor: '#151B2B', border: '1px solid rgba(255,255,255,0.08)' }}>
-          <div className="is-flex is-align-items-center" style={{ gap: '15px' }}>
-            <div className="is-flex is-align-items-center is-justify-content-center" style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'rgba(255, 255, 255, 0.08)' }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            </div>
+    <div className="section pt-5" style={{ minHeight: 'calc(100vh - 60px)' }}>
+      <div className="container px-4" style={{ maxWidth: '700px' }}>
+
+        <header
+          className="is-flex is-align-items-center is-justify-content-space-between pb-4 mb-5"
+          style={{ borderBottom: '1px solid var(--line)', gap: '16px', flexWrap: 'wrap' }}
+        >
+          <div className="is-flex is-align-items-center" style={{ gap: '14px' }}>
+            <span
+              className="is-flex is-align-items-center is-justify-content-center"
+              style={{ width: '42px', height: '42px', border: '1px solid var(--line-strong)', color: 'var(--accent-soft)' }}
+            >
+              <Icon name="shield" size={20} />
+            </span>
             <div>
-              <h1 className="title is-5 mb-0 has-text-white">{porteiro.nome}</h1>
-              <p className="is-size-7 has-text-grey-light">
-                <span className="tag is-info is-light is-small mr-2">{porteiro.role}</span>
-                {porteiro.email}
-              </p>
+              <p className="tp-eyebrow mb-1">Controle de acesso</p>
+              <h1 className="title is-5 mb-0" style={{ letterSpacing: '-0.02em' }}>{porteiro.nome}</h1>
             </div>
           </div>
+
+          <div className="has-text-right">
+            <span className="tp-tag tp-tag-accent">{porteiro.role}</span>
+            {porteiro.email && <p className="tp-mono is-size-7 tp-dim mt-2">{porteiro.email}</p>}
+          </div>
+        </header>
+
+        <div className="tp-rule">
+          <span className="tp-eyebrow">Leitor de QR Code</span>
         </div>
 
-        <div className="box p-4" style={{ backgroundColor: '#151B2B', border: '1px solid rgba(255,255,255,0.08)' }}>
-          <div className="mb-3">
-            <div style={{ width: '100%', height: '320px', backgroundColor: '#0A0E17', borderRadius: '12px', overflow: 'hidden', position: 'relative' }}>
-              <div id="reader-container" style={{ width: '100%', height: '100%' }}></div>
-              {erroCamera && <p className="has-text-danger is-size-7 p-4 text-center">{erroCamera}</p>}
+        <div className="tp-panel p-4">
+          <div className="tp-scanner">
+            <div id="reader-container" style={{ width: '100%', height: '100%' }}></div>
+            <div className="tp-scanner-frame" aria-hidden="true">
+              <span /><span /><span /><span />
             </div>
+
+            {erroCamera && (
+              <div
+                className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center p-5 has-text-centered"
+                style={{ position: 'absolute', inset: 0, background: 'var(--bg-inset)', gap: '12px' }}
+              >
+                <span style={{ color: 'var(--red)' }}><Icon name="camera" size={26} /></span>
+                <p className="tp-mono is-size-7 tp-muted" style={{ maxWidth: '34ch' }}>{erroCamera}</p>
+              </div>
+            )}
           </div>
 
-          <form onSubmit={handleSubmitManual}>
-            <div className="field has-addons">
-              <div className="control is-expanded">
-                <input 
-                  className="input" 
-                  type="text" 
-                  placeholder="Digite o QR Code..." 
-                  value={codigoQr} 
-                  onChange={(e) => setCodigoQr(e.target.value)} 
-                  style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: 'white' }}
-                />
-              </div>
-              <div className="control">
-                <button type="submit" className={`button is-link ${loading ? 'is-loading' : ''}`}>Validar</button>
-              </div>
+          <form onSubmit={handleSubmitManual} className="mt-4">
+            <label className="label mb-2" htmlFor="codigo-manual">Validação manual</label>
+            <div className="is-flex" style={{ gap: '0' }}>
+              <input
+                id="codigo-manual"
+                className="input tp-mono"
+                type="text"
+                placeholder="Digite o código do ingresso"
+                value={codigoQr}
+                onChange={(e) => setCodigoQr(e.target.value)}
+                style={{ height: '44px', borderRight: 0 }}
+              />
+              <button
+                type="submit"
+                className={`button tp-btn-primary tp-btn-label px-5 ${loading ? 'is-loading' : ''}`}
+                style={{ height: '44px' }}
+              >
+                Validar
+              </button>
             </div>
           </form>
         </div>
+
+        <p className="tp-mono is-size-7 tp-dim mt-4">
+          Evento monitorado: #{String(eventoId).padStart(4, '0')}
+        </p>
       </div>
 
       <div className={`modal ${modalAberto ? 'is-active' : ''}`}>
         <div className="modal-background" onClick={fecharModalEContinuar}></div>
-        <div className="modal-card" style={{ maxWidth: '480px', width: '90%' }}>
-          <header className="modal-card-head" style={{ backgroundColor: modalConfig.headerBg }}>
-            <p className="modal-card-title has-text-white">{resultadoValidacao?.titulo}</p>
-            <button className="delete" aria-label="close" onClick={fecharModalEContinuar}></button>
-          </header>
-          <section className="modal-card-body" style={{ backgroundColor: '#151B2B', color: '#F8FAFC' }}>
-            <p className="is-size-6 mb-2">{resultadoValidacao?.mensagem}</p>
-            <p className="is-size-7 has-text-grey">Código: <code>{resultadoValidacao?.codigo}</code></p>
-          </section>
-          <footer className="modal-card-foot" style={{ backgroundColor: '#151B2B' }}>
-            <button className={`button is-fullwidth ${modalConfig.btnClass}`} onClick={fecharModalEContinuar}>
-              Próximo Ingresso
-            </button>
-          </footer>
+        <div className="modal-content px-4" style={{ maxWidth: '460px' }}>
+          <div className="tp-panel" style={{ borderTop: `3px solid ${modalConfig.accent}` }}>
+
+            <div className="p-5" style={{ borderBottom: '1px solid var(--line)' }}>
+              <div className="is-flex is-align-items-center" style={{ gap: '14px' }}>
+                <span
+                  className="is-flex is-align-items-center is-justify-content-center"
+                  style={{ width: '40px', height: '40px', border: `1px solid ${modalConfig.accent}`, color: modalConfig.accent }}
+                >
+                  <Icon name={modalConfig.icon} size={20} />
+                </span>
+                <div>
+                  <p className="tp-eyebrow mb-1" style={{ color: modalConfig.accent }}>Resultado</p>
+                  <h2 className="title is-5 mb-0">{resultadoValidacao?.titulo}</h2>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-5">
+              <p className="mb-3">{resultadoValidacao?.mensagem}</p>
+              <p className="tp-mono is-size-7 tp-dim" style={{ wordBreak: 'break-all' }}>
+                Código: {resultadoValidacao?.codigo}
+              </p>
+            </div>
+
+            <div className="p-4" style={{ borderTop: '1px solid var(--line)' }}>
+              <button
+                className="button tp-btn-invert tp-btn-label is-fullwidth is-flex is-align-items-center is-justify-content-center"
+                style={{ gap: '10px', height: '44px' }}
+                onClick={fecharModalEContinuar}
+              >
+                Próximo ingresso
+                <Icon name="arrowRight" size={15} />
+              </button>
+            </div>
+          </div>
         </div>
+        <button className="modal-close is-large" aria-label="Fechar" onClick={fecharModalEContinuar}></button>
       </div>
     </div>
   );

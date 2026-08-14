@@ -1,31 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { API_URL } from '../../config';
+import Icon from '../../components/Icon';
+
 const formatadorMoeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
 export default function EventoDetalhe() {
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
   const [evento, setEvento] = useState(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState(null);
   const [assentosSelecionados, setAssentosSelecionados] = useState([]);
-  
 
   const fileiras = ['A', 'B', 'C', 'D', 'E'];
   const colunas = [1, 2, 3, 4, 5, 6, 7, 8];
-  const assentosOcupados = ['A2', 'A3', 'C5', 'D8', 'E1']; 
+  const assentosOcupados = ['A2', 'A3', 'C5', 'D8', 'E1'];
 
   useEffect(() => {
     const buscarEvento = async () => {
       try {
         setLoading(true);
-     
+
         const response = await fetch(`${API_URL}/eventos/${id}`);
-        
+
         if (!response.ok) throw new Error('Evento não encontrado.');
-        
+
         const data = await response.json();
         setEvento(data);
       } catch (error) {
@@ -40,7 +41,7 @@ export default function EventoDetalhe() {
 
   const toggleAssento = (assentoId) => {
     if (assentosOcupados.includes(assentoId)) return;
-    setAssentosSelecionados(prev => 
+    setAssentosSelecionados(prev =>
       prev.includes(assentoId) ? prev.filter(a => a !== assentoId) : [...prev, assentoId]
     );
   };
@@ -53,77 +54,144 @@ export default function EventoDetalhe() {
     }
   };
 
-  if (loading) return <div className="section has-text-centered"><p>Carregando evento...</p></div>;
-  if (erro) return <div className="section has-text-centered has-text-danger"><p>{erro}</p></div>;
+  if (loading) {
+    return (
+      <div className="section">
+        <div className="container px-4">
+          <p className="tp-eyebrow mb-4">Carregando evento</p>
+          <div className="tp-skeleton" style={{ height: '320px' }} />
+        </div>
+      </div>
+    );
+  }
+
+  if (erro) {
+    return (
+      <div className="section">
+        <div className="container px-4">
+          <div className="tp-panel p-6 has-text-centered">
+            <p className="tp-eyebrow mb-3" style={{ color: 'var(--red)' }}>Erro</p>
+            <p className="title is-5 mb-0">{erro}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!evento) return null;
+
+  const total = assentosSelecionados.length * evento.preco;
 
   return (
     <div className="section pt-5">
       <div className="container px-4">
+
         <div className="columns is-variable is-6">
+
           <div className="column is-5">
-            <figure className="image is-4by3 mb-4" style={{ borderRadius: '12px', overflow: 'hidden' }}>
-              <img src={evento.imagem_url || "https://via.placeholder.com/800"} alt={evento.titulo} style={{ objectFit: 'cover' }} />
+            <figure
+              className="image is-4by3 mb-5"
+              style={{ border: '1px solid var(--line)', overflow: 'hidden' }}
+            >
+              <img
+                src={evento.imagem_url || ''}
+                alt={evento.titulo}
+                style={{ objectFit: 'cover', filter: 'saturate(0.9) contrast(1.05)' }}
+              />
             </figure>
-            <h1 className="title is-3 mb-2">{evento.titulo}</h1>
-            <p className="subtitle is-5 has-text-grey mb-4">{evento.local}</p>
-            <div className="box" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}>
-              <p><strong>Data:</strong> {new Date(evento.data_evento).toLocaleString('pt-BR')}</p>
-              <p><strong>Valor:</strong> {formatadorMoeda.format(evento.preco)}</p>
-              <p><strong>Disponíveis:</strong> {evento.ingressos_disponiveis}</p>
-            </div>
+
+            <p className="tp-eyebrow mb-2">{evento.categoria || 'Evento'}</p>
+            <h1 className="title is-2 tp-display mb-3">{evento.titulo}</h1>
+            <p className="tp-mono is-size-7 tp-muted is-flex is-align-items-center mb-5" style={{ gap: '7px' }}>
+              <Icon name="pin" size={14} /> {evento.local}
+            </p>
+
+            <dl className="tp-panel">
+              {[
+                ['Data', new Date(evento.data_evento).toLocaleString('pt-BR')],
+                ['Valor unitário', formatadorMoeda.format(evento.preco)],
+                ['Disponíveis', `${evento.ingressos_disponiveis} ingressos`],
+              ].map(([rotulo, valor], i, arr) => (
+                <div
+                  key={rotulo}
+                  className="is-flex is-justify-content-space-between is-align-items-center px-4 py-3"
+                  style={{ borderBottom: i === arr.length - 1 ? 'none' : '1px solid var(--line)' }}
+                >
+                  <dt className="tp-eyebrow" style={{ fontSize: '0.625rem' }}>{rotulo}</dt>
+                  <dd className="tp-mono is-size-7">{valor}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
 
-          {/* Mapa de Assentos */}
           <div className="column is-7">
-            <h2 className="title is-4 mb-5">Selecione seus lugares</h2>
-            <div className="box has-text-centered pb-6" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}>
-              <div className="mb-5 p-2 has-text-grey-light is-size-7" style={{ borderBottom: '2px solid var(--border-color)', margin: '0 auto', width: '80%' }}>
-                PALCO / TELA
+            <div className="tp-rule">
+              <span className="tp-eyebrow">Selecione seus lugares</span>
+            </div>
+
+            <div className="tp-panel p-5">
+              <div className="tp-stage mb-5" style={{ margin: '0 auto', width: '70%' }}>
+                <span className="tp-eyebrow" style={{ fontSize: '0.625rem' }}>Palco / Tela</span>
               </div>
-              <div className="is-inline-block has-text-left">
+
+              <div className="is-flex is-flex-direction-column is-align-items-center" style={{ gap: '8px' }}>
                 {fileiras.map(fileira => (
-                  <div key={fileira} className="is-flex is-align-items-center is-justify-content-center mb-2">
-                    <span className="has-text-grey-light mr-3 is-size-7" style={{ width: '20px' }}>{fileira}</span>
+                  <div key={fileira} className="is-flex is-align-items-center" style={{ gap: '8px' }}>
+                    <span className="tp-index" style={{ width: '14px' }}>{fileira}</span>
                     {colunas.map(col => {
                       const assentoId = `${fileira}${col}`;
                       const isOcupado = assentosOcupados.includes(assentoId);
                       const isSelecionado = assentosSelecionados.includes(assentoId);
-                      
-                      let btnClass = "button is-small mx-1 p-0 ";
-                      if (isOcupado) btnClass += "is-static has-background-danger-light has-text-danger";
-                      else if (isSelecionado) btnClass += "is-link";
-                      else btnClass += "is-light";
 
                       return (
                         <button
                           key={assentoId}
-                          className={btnClass}
-                          style={{ width: '36px', height: '36px', borderRadius: '8px' }}
+                          type="button"
+                          className={`tp-seat ${isOcupado ? 'is-taken' : ''} ${isSelecionado ? 'is-picked' : ''}`}
                           onClick={() => toggleAssento(assentoId)}
                           disabled={isOcupado}
-                          title={isOcupado ? 'Ocupado' : `Livre - ${assentoId}`}
+                          aria-pressed={isSelecionado}
+                          title={isOcupado ? `Ocupado — ${assentoId}` : `Livre — ${assentoId}`}
                         >
-                          <span className="is-size-7">{col}</span>
+                          {col}
                         </button>
                       );
                     })}
                   </div>
                 ))}
               </div>
+
+              <div
+                className="is-flex is-justify-content-center mt-5 pt-4"
+                style={{ gap: '20px', borderTop: '1px solid var(--line)', flexWrap: 'wrap' }}
+              >
+                <span className="tp-tag">Livre</span>
+                <span className="tp-tag tp-tag-accent">Selecionado</span>
+                <span className="tp-tag" style={{ opacity: 0.55, textDecoration: 'line-through' }}>Ocupado</span>
+              </div>
             </div>
 
-            <div className="is-flex is-justify-content-space-between is-align-items-center mt-4">
+            <div
+              className="tp-panel p-4 mt-4 is-flex is-justify-content-space-between is-align-items-center"
+              style={{ gap: '16px', flexWrap: 'wrap' }}
+            >
               <div>
-                <p className="is-size-7 has-text-grey">Total a pagar:</p>
-                <p className="title is-4 mb-0 has-text-link">{formatadorMoeda.format(assentosSelecionados.length * evento.preco)}</p>
+                <p className="tp-eyebrow mb-1" style={{ fontSize: '0.625rem' }}>
+                  {assentosSelecionados.length > 0
+                    ? `Assentos ${assentosSelecionados.join(' · ')}`
+                    : 'Nenhum assento selecionado'}
+                </p>
+                <p className="tp-metric-value">{formatadorMoeda.format(total)}</p>
               </div>
-              <button 
-                className="button is-link is-medium" 
+
+              <button
+                className="button tp-btn-primary tp-btn-label is-flex is-align-items-center px-5"
+                style={{ gap: '10px', height: '46px' }}
                 disabled={assentosSelecionados.length === 0 || evento.ingressos_disponiveis < assentosSelecionados.length}
                 onClick={irParaCheckout}
               >
-                Ir para o Pagamento
+                Ir para o pagamento
+                <Icon name="arrowRight" size={15} />
               </button>
             </div>
           </div>

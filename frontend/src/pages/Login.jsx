@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { API_URL } from '../config';
+import Icon from '../components/Icon';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -33,16 +34,14 @@ export default function Login() {
 
       const data = await response.json();
       const token = data.access_token;
-      
+
       localStorage.setItem('token', token);
 
-      
       try {
         const payloadBase64 = token.split('.')[1];
         const decodedPayload = JSON.parse(atob(payloadBase64));
-        const userRole = decodedPayload.role ; 
+        const userRole = decodedPayload.role ;
 
-      
         switch (userRole) {
           case 'cliente':
             navigate('/meus-ingressos', { replace: true });
@@ -59,7 +58,7 @@ export default function Login() {
         }
       } catch (decodeError) {
         console.error("Erro ao ler a role do token:", decodeError);
-        navigate('/', { replace: true }); 
+        navigate('/', { replace: true });
       }
 
     } catch (error) {
@@ -69,76 +68,95 @@ export default function Login() {
     }
   };
 
-  const inputStyle = {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    color: 'white',
-  };
-
   return (
-    <div className="section is-flex is-align-items-center is-justify-content-center" style={{ minHeight: 'calc(100vh - 80px)' }}>
-      <div className="container" style={{ maxWidth: '400px' }}>
-        <div className="card p-5">
-          <div className="card-content">
-            <h1 className="title is-4 has-text-centered mb-5">Bem-vindo de volta</h1>
+    <div className="section" style={{ minHeight: 'calc(100vh - 60px)' }}>
+      <div className="container px-4">
+        <div className="tp-grid" style={{ gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', alignItems: 'stretch', gap: 0 }}>
 
-            {erro && <div className="notification is-danger is-light mb-4 py-2 px-3 is-size-7">{erro}</div>}
+          <aside
+            className="is-hidden-mobile is-flex is-flex-direction-column is-justify-content-space-between p-6"
+            style={{ border: '1px solid var(--line)', borderRight: 0, background: 'var(--bg-inset)' }}
+          >
+            <p className="tp-eyebrow">Acesso · 01</p>
+            <div>
+              <h2 className="title is-2 tp-display mb-4" style={{ maxWidth: '14ch' }}>
+                Seus ingressos, sempre à mão.
+              </h2>
+              <p className="tp-muted is-size-6" style={{ maxWidth: '38ch' }}>
+                Entre para acompanhar compras, abrir o QR Code na portaria e gerenciar seus eventos.
+              </p>
+            </div>
+            <div className="tp-mono is-size-7 tp-dim">TicketPlatform</div>
+          </aside>
 
-            <form onSubmit={handleLogin}>
-              <div className="field mb-4">
-                <label className="label has-text-weight-normal is-size-7" style={{ color: 'var(--text-secondary)' }}>
-                  E-mail
-                </label>
-                <div className="control">
-                  <input
-                    className="input is-rounded"
-                    type="email"
-                    placeholder="seu@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    style={inputStyle}
-                    required
-                    disabled={loading}
-                  />
+          <div
+            className="p-6 is-flex is-flex-direction-column is-justify-content-center"
+            style={{ border: '1px solid var(--line)', background: 'var(--bg-surface)' }}
+          >
+            <div style={{ maxWidth: '380px', width: '100%', margin: '0 auto' }}>
+              <p className="tp-eyebrow mb-2">Entrar</p>
+              <h1 className="title is-3 tp-display mb-5">Bem-vindo de volta</h1>
+
+              {erro && (
+                <div className="notification is-danger is-light mb-4 py-2 px-3 is-size-7 is-flex is-align-items-center" style={{ gap: '8px' }}>
+                  <Icon name="alert" size={15} />
+                  <span>{erro}</span>
                 </div>
-              </div>
+              )}
 
-              <div className="field mb-5">
-                <div className="is-flex is-justify-content-space-between is-align-items-center mb-1">
-                  <label className="label has-text-weight-normal is-size-7 mb-0" style={{ color: 'var(--text-secondary)' }}>
-                    Senha
-                  </label>
-                  <Link to="#" className="is-size-7 has-text-link">Esqueceu a senha?</Link>
+              <form onSubmit={handleLogin}>
+                <div className="field tp-field">
+                  <label className="label" htmlFor="login-email">E-mail</label>
+                  <div className="control">
+                    <input
+                      id="login-email"
+                      className="input"
+                      type="email"
+                      placeholder="seu@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      disabled={loading}
+                    />
+                  </div>
                 </div>
-                <div className="control">
-                  <input
-                    className="input is-rounded"
-                    type="password"
-                    placeholder="••••••••"
-                    value={senha}
-                    onChange={(e) => setSenha(e.target.value)}
-                    style={inputStyle}
-                    required
-                    disabled={loading}
-                  />
-                </div>
-              </div>
 
-              <div className="control mt-5">
+                <div className="field tp-field">
+                  <div className="is-flex is-justify-content-space-between is-align-items-baseline mb-2">
+                    <label className="label mb-0" htmlFor="login-senha">Senha</label>
+                    <Link to="#" className="tp-mono is-size-7 tp-muted">Esqueceu?</Link>
+                  </div>
+                  <div className="control">
+                    <input
+                      id="login-senha"
+                      className="input"
+                      type="password"
+                      placeholder="••••••••"
+                      value={senha}
+                      onChange={(e) => setSenha(e.target.value)}
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+                </div>
+
                 <button
                   type="submit"
-                  className={`button is-warning is-rounded is-fullwidth has-text-weight-bold ${loading ? 'is-loading' : ''}`}
-                  style={{ backgroundColor: '#FFD700', border: 'none', color: '#000' }}
+                  className={`button tp-btn-primary tp-btn-label is-fullwidth mt-5 ${loading ? 'is-loading' : ''}`}
+                  style={{ height: '46px' }}
                   disabled={loading}
                 >
                   Entrar
                 </button>
-              </div>
-            </form>
+              </form>
 
-            <div className="has-text-centered mt-5">
-              <p className="is-size-7" style={{ color: 'var(--text-secondary)' }}>
-                Ainda não tem uma conta? <Link to="/register" className="has-text-link has-text-weight-bold">Cadastre-se</Link>
+              <hr className="tp-divider" />
+
+              <p className="is-size-7 tp-muted">
+                Ainda não tem uma conta?{' '}
+                <Link to="/register" className="has-text-weight-semibold" style={{ color: 'var(--accent-soft)' }}>
+                  Cadastre-se
+                </Link>
               </p>
             </div>
           </div>

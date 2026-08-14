@@ -1,81 +1,796 @@
 @charset "utf-8";
 
-// 1. Cores extraídas da paleta fornecida
-$brand-light-blue: #3CA2EE; 
-$brand-blue:       #007CF8; 
+/* =========================================================
+   TicketPlatform — Design System
+   Direção: editorial suíço + "ticket stub" impresso.
+   Regras: sem gradientes, sem sombras difusas, sem emojis.
+   Hierarquia por bordas de 1px, contraste de superfície,
+   escala tipográfica arrojada e sombras duras (offset sólido).
+   ========================================================= */
+
+/* 1. Fundação de cor — mantém a identidade azul/roxo original */
+$brand-light-blue: #3CA2EE;
+$brand-blue:       #007CF8;
 $brand-deep-blue:  #3C49EE;
 $brand-purple:     #6844EF;
 $brand-magenta:    #883CEE;
 
-// Fundo escuro inspirado na imagem de referência do layout
-$brand-dark:       #0B0F19; 
-$brand-surface:    #151B2B;
+/* Escala neutra refinada (fria, derivada do azul) */
+$ink-000: #05070C;
+$ink-050: #090C14;
+$ink-100: #0B0F19;
+$ink-200: #10151F;
+$ink-300: #151B2B;
+$ink-400: #1D2536;
+$ink-500: #2A3346;
+$ink-600: #3A465C;
 
-// 2. Mapeamento do Bulma
+$mist-100: #F7F8FA;
+$mist-300: #C7CDD9;
+$mist-500: #8A93A5;
+$mist-700: #5C6577;
+
+$signal-amber: #F2C230;
+$signal-green: #34D399;
+$signal-red:   #F0555B;
+
+/* 2. Mapeamento Bulma */
 $primary: $brand-blue;
-
 $link: $brand-light-blue;
-$link-hover: darken($brand-light-blue, 10%);
+$link-hover: $mist-100;
+$info: $brand-purple;
+$success: $signal-green;
+$warning: $signal-amber;
+$danger: $signal-red;
+$dark: $ink-100;
 
-// Mantido vermelho padrão apenas para ações destrutivas/erros
-$danger: #EF4444; 
+$scheme-main: $ink-100;
+$text: $mist-100;
 
-$dark: $brand-dark;
+$radius: 2px;
+$radius-small: 2px;
+$radius-large: 3px;
+$radius-rounded: 2px;
 
-$scheme-main: $brand-dark; 
-$text: #F9FAFB; // Texto claro para contraste        
+$family-sans-serif: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
+$family-monospace: "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
 
 @import "bulma/bulma";
 
-// 3. Estilos Base
-.navbar {
-  background-color: $scheme-main;
+/* 3. Tokens de runtime */
+:root {
+  --ink-000: #{$ink-000};
+  --ink-100: #{$ink-100};
+  --ink-200: #{$ink-200};
+  --ink-300: #{$ink-300};
+  --ink-400: #{$ink-400};
+  --ink-500: #{$ink-500};
+
+  --bg-base: #{$ink-100};
+  --bg-surface: #{$ink-200};
+  --bg-surface-raised: #{$ink-300};
+  --bg-inset: #{$ink-050};
+
+  --line: #{rgba(#FFFFFF, 0.10)};
+  --line-strong: #{rgba(#FFFFFF, 0.22)};
+  --border-color: #{rgba(#FFFFFF, 0.10)};
+
+  --text-primary: #{$mist-100};
+  --text-secondary: #{$mist-500};
+  --text-tertiary: #{$mist-700};
+
+  --accent: #{$brand-blue};
+  --accent-soft: #{$brand-light-blue};
+  --accent-alt: #{$brand-magenta};
+  --amber: #{$signal-amber};
+  --green: #{$signal-green};
+  --red: #{$signal-red};
+
+  --step: 4px;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
 }
 
-// Remove os blocos quadrados e aplica hover arredondado
-.navbar-item, .navbar-link {
-  color: $text !important;
-  border-radius: 8px; // Deixa o elemento preparado para um fundo arredondado
-  margin: 2px 4px; // Adiciona um respiro para o hover não grudar nas bordas
-  transition: all 0.2s ease;
-  
-  &:hover, &:focus {
-    color: $brand-light-blue !important;
-    background-color: $brand-surface !important;
-    border-radius: 8px !important; // Força o hover a ser arredondado
+/* 4. Base */
+html {
+  background-color: var(--bg-base);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  /* Textura sutil de ruído — substitui qualquer gradiente */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--accent-soft);
+  outline-offset: 2px;
+}
+
+/* 5. Tipografia */
+.title,
+.subtitle {
+  color: var(--text-primary);
+}
+
+.title {
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.title.is-1,
+.title.is-2,
+.title.is-3 {
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+}
+
+.tp-display {
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 0.94;
+  text-wrap: balance;
+}
+
+.tp-eyebrow {
+  font-family: #{$family-monospace};
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  display: inline-block;
+}
+
+.tp-mono {
+  font-family: #{$family-monospace};
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.tp-muted { color: var(--text-secondary) !important; }
+.tp-dim   { color: var(--text-tertiary) !important; }
+
+/* Régua de seção: rótulo mono + linha contínua */
+.tp-rule {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--line);
   }
 }
 
-// Ajuste para o dropdown interno (menu de cidades) não ficar quadrado
+/* 6. Superfícies */
+.tp-panel {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+
+.tp-panel-inset {
+  background-color: var(--bg-inset);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+
+/* Sombra dura, sem desfoque — usada apenas em elementos-âncora */
+.tp-hard {
+  box-shadow: 6px 6px 0 0 var(--ink-000);
+}
+
+.tp-hard-accent {
+  box-shadow: 5px 5px 0 0 var(--accent);
+}
+
+.card,
+.box {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  box-shadow: none;
+  color: var(--text-primary);
+}
+
+.box { padding: 20px; }
+
+/* 7. Navbar */
+.navbar {
+  background-color: var(--bg-base);
+  border-bottom: 1px solid var(--line);
+  min-height: 3.75rem;
+}
+
+.navbar-item,
+.navbar-link {
+  color: var(--text-primary) !important;
+  border-radius: 0;
+  transition: color 0.12s var(--ease), background-color 0.12s var(--ease);
+
+  &:hover,
+  &:focus {
+    color: var(--text-primary) !important;
+    background-color: transparent !important;
+  }
+}
+
+.tp-navlink {
+  position: relative;
+  font-family: #{$family-monospace};
+  font-size: 0.6875rem !important;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-secondary) !important;
+  padding: 0.5rem 0.75rem;
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.25rem;
+    height: 1px;
+    background: var(--accent-soft);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.14s var(--ease);
+  }
+
+  &:hover {
+    color: var(--text-primary) !important;
+
+    &::after { transform: scaleX(1); }
+  }
+
+  &.is-current {
+    color: var(--text-primary) !important;
+
+    &::after { transform: scaleX(1); background: var(--accent); }
+  }
+}
+
 .navbar-dropdown {
-  background-color: $brand-surface;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  padding: 8px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 2px;
+  padding: 4px;
+  box-shadow: 6px 6px 0 0 var(--ink-000);
 
   .navbar-item {
-    border-radius: 6px;
-    margin: 2px 0;
-    
+    font-size: 0.8125rem;
+    border-radius: 0;
+    color: var(--text-secondary) !important;
+
     &:hover {
-      background-color: lighten($brand-surface, 5%) !important;
+      background-color: var(--bg-surface-raised) !important;
+      color: var(--text-primary) !important;
     }
   }
 }
 
-// Oculta a seta quadrada padrão do Bulma nos dropdowns
-.navbar-link:not(.is-arrowless)::after {
-  display: none !important;
+.navbar-link:not(.is-arrowless)::after { display: none !important; }
+
+.navbar-divider { background-color: var(--line); }
+
+/* 8. Botões */
+.button {
+  border-radius: 2px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: background-color 0.12s var(--ease), color 0.12s var(--ease),
+    border-color 0.12s var(--ease), transform 0.1s var(--ease),
+    box-shadow 0.1s var(--ease);
+  box-shadow: none;
+
+  &:active { transform: translateY(1px); }
 }
 
-// Customizações globais para os cards no tema escuro
-.card {
-  background-color: $brand-surface;
-  border-radius: 12px; // Arredondamento suave para os cards também
-  border: none;
+/* Ação principal: bloco sólido, sem gradiente */
+.tp-btn-primary {
+  background-color: var(--accent);
+  border: 1px solid var(--accent);
+  color: #fff;
+
+  &:hover {
+    background-color: #fff;
+    border-color: #fff;
+    color: var(--ink-000);
+  }
+
+  &.is-loading::after { border-color: transparent transparent #fff #fff !important; }
+
+  &[disabled],
+  &:disabled {
+    background-color: transparent;
+    border-color: var(--line-strong);
+    color: var(--text-muted);
+    opacity: 1;
+    cursor: not-allowed;
+  }
+}
+
+
+/* Ação secundária: contorno fino */
+.tp-btn-ghost {
+  background-color: transparent;
+  border: 1px solid var(--line-strong);
+  color: var(--text-primary);
+
+  &:hover {
+    background-color: var(--bg-surface-raised);
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+  }
+}
+
+/* Ação de destaque: contraste invertido */
+.tp-btn-invert {
+  background-color: var(--text-primary);
+  border: 1px solid var(--text-primary);
+  color: var(--ink-000);
+
+  &:hover {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  &.is-loading::after { border-color: transparent transparent var(--ink-000) var(--ink-000) !important; }
+}
+
+.tp-btn-quiet {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+
+  &:hover {
+    color: var(--text-primary);
+    border-color: var(--line);
+  }
+}
+
+.tp-btn-label {
+  font-family: #{$family-monospace};
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* 9. Formulários */
+.input,
+.textarea,
+.select select {
+  background-color: var(--bg-inset);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  color: var(--text-primary);
+  box-shadow: none;
+  transition: border-color 0.12s var(--ease), background-color 0.12s var(--ease);
+
+  &::placeholder { color: var(--text-tertiary); }
+
+  &:hover { border-color: var(--line-strong); }
+
+  &:focus,
+  &.is-focused,
+  &:active {
+    background-color: var(--bg-inset);
+    border-color: var(--accent);
+    box-shadow: none;
+    color: var(--text-primary);
+  }
+}
+
+.label {
+  color: var(--text-secondary);
+  font-family: #{$family-monospace};
+  font-size: 0.6875rem !important;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Campo com rótulo alinhado à esquerda e linha de base */
+.tp-field { margin-bottom: 18px; }
+
+/* 10. Tags e status */
+.tag {
+  border-radius: 2px;
+  font-family: #{$family-monospace};
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+
+.tp-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  color: var(--text-secondary);
+  font-family: #{$family-monospace};
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 2px;
+}
+
+.tp-tag-accent { border-color: var(--accent); color: var(--accent-soft); }
+.tp-tag-green  { border-color: #{rgba($signal-green, 0.5)}; color: var(--green); }
+.tp-tag-amber  { border-color: #{rgba($signal-amber, 0.5)}; color: var(--amber); }
+.tp-tag-red    { border-color: #{rgba($signal-red, 0.5)};   color: var(--red); }
+
+.tp-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  display: inline-block;
+}
+
+/* 11. Notificações */
+.notification {
+  border-radius: 2px;
+  border: 1px solid var(--line-strong);
+  background-color: var(--bg-surface-raised);
+  color: var(--text-primary);
+}
+
+.notification.is-danger,
+.notification.is-danger.is-light {
+  background-color: #{rgba($signal-red, 0.10)};
+  border-color: #{rgba($signal-red, 0.45)};
+  color: #FFD9DA;
+}
+
+/* 12. Tabelas */
+.table {
+  background-color: transparent;
+  color: var(--text-primary);
+
+  th {
+    color: var(--text-secondary) !important;
+    font-family: #{$family-monospace};
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--line-strong) !important;
+  }
+
+  td {
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--line) !important;
+    vertical-align: middle;
+  }
+
+  tbody tr:hover td { background-color: var(--bg-surface-raised); }
+}
+
+/* 13. Modais */
+.modal-background { background-color: #{rgba($ink-000, 0.86)}; }
+
+.modal-card,
+.modal-content {
+  border-radius: 2px;
+}
+
+.modal-card-head,
+.modal-card-foot {
+  background-color: var(--bg-surface);
+  border-color: var(--line);
+  border-radius: 0;
+}
+
+.modal-card-body { background-color: var(--bg-surface); }
+
+.modal-card-title {
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* 14. Componentes de produto */
+
+/* Cartão de evento — moldura fina, imagem em corte alto */
+.tp-event-card {
+  display: block;
+  background: var(--bg-surface);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.12s var(--ease), background-color 0.12s var(--ease);
+
+  .tp-event-media {
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-inset);
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(0.85) contrast(1.05);
+    transition: filter 0.18s var(--ease), transform 0.18s var(--ease);
+  }
+
+  &:hover {
+    border-color: var(--line-strong);
+    background: var(--bg-surface-raised);
+
+    img { filter: saturate(1.05) contrast(1); transform: scale(1.03); }
+  }
+}
+
+/* Índice numerado nas laterais dos cards */
+.tp-index {
+  font-family: #{$family-monospace};
+  font-size: 0.6875rem;
+  color: var(--text-tertiary);
+  letter-spacing: 0.08em;
+}
+
+/* Faixa horizontal contínua */
+.tp-marquee {
+  overflow: hidden;
+  width: 100%;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 20px 0;
+}
+
+.tp-marquee-track {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+  animation: tp-scroll 42s linear infinite;
+}
+
+.tp-marquee:hover .tp-marquee-track { animation-play-state: paused; }
+
+@keyframes tp-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(calc(-50% - 8px)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tp-marquee-track { animation: none; }
+}
+
+/* Hero editorial: bloco geométrico, imagem tratada, sem gradiente */
+.tp-hero {
+  position: relative;
+  border: 1px solid var(--line);
+  background: var(--bg-inset);
   overflow: hidden;
 }
 
-.title, .subtitle {
-  color: $text !important;
+.tp-hero-media {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: grayscale(0.35) contrast(1.08) brightness(0.42);
+}
+
+.tp-hero-scrim {
+  position: absolute;
+  inset: 0;
+  background-color: #{rgba($ink-000, 0.45)};
+}
+
+.tp-hero-body {
+  position: relative;
+  padding: 40px;
+}
+
+@media screen and (max-width: 768px) {
+  .tp-hero-body { padding: 24px; }
+}
+
+/* Mapa de assentos */
+.tp-seat {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 2px;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: #{$family-monospace};
+  font-size: 0.6875rem;
+  cursor: pointer;
+  transition: background-color 0.1s var(--ease), color 0.1s var(--ease),
+    border-color 0.1s var(--ease);
+
+  &:hover:not(:disabled) {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+  }
+
+  &.is-taken {
+    border-color: transparent;
+    background: #{rgba(#FFFFFF, 0.04)};
+    color: var(--text-tertiary);
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+
+  &.is-picked {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+}
+
+.tp-stage {
+  border: 1px solid var(--line-strong);
+  border-bottom-width: 3px;
+  border-bottom-color: var(--accent);
+  padding: 8px 0;
+  text-align: center;
+}
+
+/* Stub de ingresso: recorte com perfuração */
+.tp-stub {
+  display: flex;
+  align-items: stretch;
+  background: var(--bg-surface);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+  transition: border-color 0.12s var(--ease), background-color 0.12s var(--ease);
+
+  &:hover {
+    border-color: var(--line-strong);
+    background: var(--bg-surface-raised);
+  }
+}
+
+.tp-stub-perf {
+  width: 1px;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--line-strong) 0 6px,
+    transparent 6px 12px
+  );
+}
+
+.tp-stub-used { opacity: 0.5; }
+
+/* Placar de métricas */
+.tp-metric {
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--accent);
+  background: var(--bg-surface);
+  padding: 18px 20px;
+
+  &.is-alt  { border-left-color: var(--accent-alt); }
+  &.is-warm { border-left-color: var(--amber); }
+}
+
+.tp-metric-value {
+  font-family: #{$family-monospace};
+  font-size: 1.9rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+/* Abas em segmento */
+.tp-segment {
+  display: inline-flex;
+  border: 1px solid var(--line-strong);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.tp-segment button {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-right: 1px solid var(--line);
+  padding: 8px 14px;
+  color: var(--text-secondary);
+  font-family: #{$family-monospace};
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.1s var(--ease), color 0.1s var(--ease);
+
+  &:last-child { border-right: 0; }
+
+  &:hover { color: var(--text-primary); }
+
+  &[data-active="true"] {
+    background: var(--text-primary);
+    color: var(--ink-000);
+  }
+}
+
+/* Leitor de QR */
+.tp-scanner {
+  position: relative;
+  width: 100%;
+  height: 330px;
+  background: var(--bg-inset);
+  border: 1px solid var(--line);
+  overflow: hidden;
+
+  video { object-fit: cover; }
+}
+
+.tp-scanner-frame {
+  position: absolute;
+  inset: 44px;
+  pointer-events: none;
+
+  span {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    border: 2px solid var(--accent-soft);
+  }
+
+  span:nth-child(1) { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+  span:nth-child(2) { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+  span:nth-child(3) { bottom: 0; left: 0; border-right: 0; border-top: 0; }
+  span:nth-child(4) { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+}
+
+/* Grade utilitária */
+.tp-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.tp-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.tp-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+@media screen and (max-width: 768px) {
+  .tp-grid-2,
+  .tp-grid-3 { grid-template-columns: minmax(0, 1fr); }
+}
+
+.tp-divider {
+  height: 1px;
+  background: var(--line);
+  border: 0;
+  margin: 20px 0;
+}
+
+.tp-skeleton {
+  border: 1px solid var(--line);
+  background: var(--bg-surface);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Rodapé de página */
+.tp-footer {
+  border-top: 1px solid var(--line);
+  padding: 32px 0;
+  color: var(--text-tertiary);
 }
