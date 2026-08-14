@@ -1,8 +1,16 @@
 # Plataforma de Eventos e Ingressos - Desafio Elite Dev
 
-![GitHub repo size](https://img.shields.io/github/repo-size/seu-usuario/seu-repositorio?style=for-the-badge)
-![GitHub language count](https://img.shields.io/github/languages/count/gabeRN1/seu-repositorio?style=for-the-badge)
+<div align="center">
+  <!-- Badges das Tecnologias -->
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React">
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI">
+  <img src="https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite">
+  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel">
+</div>
 
+<br>
 <img src="imagem.png" alt="Exemplo imagem do projeto"> 
 
 > Sistema de gerenciamento de eventos e ingressos desenvolvido para o Desafio Elite Dev. A plataforma permite a criação de eventos via API externa, compra de ingressos com mapa de assentos ou quantidade, e validacao via QR Code na portaria.
@@ -54,26 +62,26 @@ O projeto e uma aplicacao full-stack que resolve o fluxo completo de um evento. 
 A construcao da aplicacao foi dividida em fases para garantir que o fluxo de ponta a ponta seja estabelecido de forma estruturada, comecando pelo backend.
 
 ### Fase 1: Estruturacao do Banco e Autenticacao (Backend)
-- [ ] Configuracao do ambiente Python e instalacao do FastAPI, SQLAlchemy e Alembic.
-- [ ] Modelagem e criacao das tabelas via Alembic: Usuarios, Eventos, Ingressos/Reservas.
-- [ ] Implementacao da Autenticacao via JWT, separando os acessos para Organizador, Cliente e Portaria.
-- [ ] Criacao do script de Seed para popular o banco com os usuarios obrigatorios para teste.
+- [x] Configuracao do ambiente Python e instalacao do FastAPI, SQLAlchemy e Alembic.
+- [x] Modelagem e criacao das tabelas via Alembic: Usuarios, Eventos, Ingressos/Reservas.
+- [x] Implementacao da Autenticacao via JWT, separando os acessos para Organizador, Cliente e Portaria.
+- [x] Criacao do script de Seed para popular o banco com os usuarios obrigatorios para teste.
 
 ### Fase 2: Integracao e Logica de Negocio (Backend)
-- [ ] Integracao com a API externa escolhida (TMDb ou Ticketmaster) para popular o formulario de criacao de eventos.
-- [ ] Implementacao do endpoint de criacao de eventos (exclusivo para o papel Organizador).
-- [ ] Criacao da logica de reserva de assentos com trava de concorrencia (prevencao de dupla venda).
-- [ ] Implementacao do endpoint de checkout simulado (aprovacao/recusa).
-- [ ] Geracao segura do hash para o QR Code do ingresso (inforjavel).
-- [ ] Endpoint de validacao para o papel Portaria, verificando se o ingresso ja foi usado, se e invalido ou do evento errado.
+- [x] Integracao com a API externa escolhida (TMDb ou Ticketmaster) para popular o formulario de criacao de eventos.
+- [x] Implementacao do endpoint de criacao de eventos (exclusivo para o papel Organizador).
+- [x] Criacao da logica de reserva de assentos com trava de concorrencia (prevencao de dupla venda).
+- [x] Implementacao do endpoint de checkout simulado (aprovacao/recusa).
+- [x] Geracao segura do hash para o QR Code do ingresso (inforjavel).
+- [x] Endpoint de validacao para o papel Portaria, verificando se o ingresso ja foi usado, se e invalido ou do evento errado.
 
 ### Fase 3: Estruturacao Basica do Front-End (React)
-- [ ] Configuracao do projeto (Vite + React) e roteamento basico.
-- [ ] Criacao das telas de Login e redirecionamento baseado em papel.
-- [ ] Tela do Cliente: Catalogo de eventos, fluxo de compra simples (selecao de assento e checkout simulado).
-- [ ] Tela "Meus Ingressos": Renderizacao do ingresso comprado e do QR Code na tela com link de compartilhamento.
-- [ ] Tela do Organizador: Formulario simples buscando dados da API externa.
-- [ ] Tela da Portaria: Input para digitar o codigo e componente de leitura de camera, consumindo a API de validacao.
+- [x] Configuracao do projeto (Vite + React) e roteamento basico.
+- [x] Criacao das telas de Login e redirecionamento baseado em papel.
+- [x] Tela do Cliente: Catalogo de eventos, fluxo de compra simples (selecao de assento e checkout simulado).
+- [x] Tela "Meus Ingressos": Renderizacao do ingresso comprado e do QR Code na tela com link de compartilhamento.
+- [x] Tela do Organizador: Formulario simples buscando dados da API externa.
+- [x] Tela da Portaria: Input para digitar o codigo e componente de leitura de camera, consumindo a API de validacao.
 
 ## Pre-requisitos
 
@@ -82,15 +90,15 @@ Antes de comecar, verifique se voce atendeu aos seguintes requisitos:
 * Node.js `> 18`
 * Chaves de API validas para o `TMDb` ou `Ticketmaster`.
 
-
-
 ## Uso de Inteligencia Artificial
 
 Em alinhamento com as diretrizes do desafio, o uso de ferramentas de Inteligencia Artificial foi focado na otimizacao de tempo e auxilio em tarefas repetitivas. Todas as decisoes arquiteturais foram tomadas manualmente para evitar solucoes genericas.
 
 * **Ferramentas utilizadas:** Gemini
-* **O que foi feito com IA:** Criação base do README utilizando o Template de projetos do IuriCode(Link para o Repo de Referencia:https://github.com/iuricode/readme-template)
-* **O que foi feito sem IA:** [Preencher posteriormente]
+* **O que foi feito com IA:** Criação base do README utilizando o Template de projetos do IuriCode(Link para o Repo de Referencia:https://github.com/iuricode/readme-template), ajuda no desenvolvimento de front-end(sinceramente gostaria de ter dado um pouco mais de atenção no design e na construção do front, mas to com um computador provisório, então demorei pra desenvolver o sistema todo) e alinhamento com o backend.
+* **O que foi feito sem IA:** A estrutura de backend, utilizei o padrão dos meus projetos, visei manter a segurança por minha conta já que a IA tende a falhar bastante nisso, como proteger os .env, schemas e modelos, tambem foquei bastante na restrutura de prompts e da funções, pensando bem nas regras de negócio, o desenvolvimento de funções no backend, padronização de dados do backend, deploy no vercel, configuração do supabase(tenho preferencia por DB como Mysql, mas tava ficando com tempo curto kkkkk), pytest desenvolvido para testar as funções no backend e rotas.
+
+* *Observação acho que mesmo depois de acabar esse projeto eu dê um pouco mais de atenção e carinho no projeto, priorizei entregar algo sólido no praso do que fazer algo bonito e rebuscado e não entregar dentro do prazo, se te interessou da um follow e uma estrela que vou ir fazendo updates com o que eu achar melhor*
 
 ## Licenca
 
