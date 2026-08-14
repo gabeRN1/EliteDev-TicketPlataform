@@ -62,18 +62,16 @@ export default function PortariaHome({ usuario, eventoId = 1 }) {
     }
 
     try {
-      
       const token = localStorage.getItem('token');
       
-    
-      const response = await fetch(`${API_URL}/eventos/ingressos/validar`, {
+      const response = await fetch(`${API_URL}/eventos/portaria/validar`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}` 
         },
         body: JSON.stringify({
-          evento_id: eventoId,
+          evento_id: Number(eventoId),
           qr_code: codigo
         })
       });
@@ -82,17 +80,21 @@ export default function PortariaHome({ usuario, eventoId = 1 }) {
 
       if (response.ok) {
         setResultadoValidacao({
-          status: ticketData.status, 
-          titulo: ticketData.status === 'aprovado' ? 'Acesso Liberado' : 'Validação',
-          mensagem: `Ingresso de ID #${ticketData.id}`,
+          status: 'aprovado',
+          titulo: ticketData.mensagem || 'Acesso Liberado', 
+          mensagem: `Ingresso de ID #${ticketData.ticket_id} validado com sucesso!`,
           codigo: codigo,
           detalhes: ticketData
         });
       } else {
+        const errorMessage = Array.isArray(ticketData.detail)
+          ? ticketData.detail[0].msg
+          : ticketData.detail || 'Código inválido ou não pertencente a este evento.';
+
         setResultadoValidacao({
           status: 'invalido',
           titulo: 'Validação Falhou',
-          mensagem: ticketData.detail || 'Código inválido ou não pertencente a este evento.',
+          mensagem: errorMessage,
           codigo: codigo
         });
       }
@@ -132,6 +134,7 @@ export default function PortariaHome({ usuario, eventoId = 1 }) {
         return { headerBg: '#78350F', btnClass: 'is-warning', title: 'Aguardando Pagamento' };
       case 'cancelado':
       case 'utilizado':
+      case 'invalido':
       default:
         return { headerBg: '#7F1D1D', btnClass: 'is-danger', title: 'Acesso Negado' };
     }
