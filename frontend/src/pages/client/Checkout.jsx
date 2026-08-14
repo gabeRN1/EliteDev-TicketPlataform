@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { API_URL } from '../../config';
+
 const formatadorMoeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
 export default function Checkout() {
@@ -12,16 +13,35 @@ export default function Checkout() {
   const [status, setStatus] = useState('idle');
   const [mensagemErro, setMensagemErro] = useState('');
 
+  const [dadosCartao, setDadosCartao] = useState({
+    nome: '',
+    numero: '',
+    validade: '',
+    cvv: ''
+  });
+
   if (!evento) {
     navigate('/');
     return null;
   }
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setDadosCartao(prev => ({ ...prev, [name]: value }));
+  };
 
   const handlePagamento = async (e) => {
     e.preventDefault();
     setLoading(true);
     setStatus('idle');
     setMensagemErro('');
+
+    if (dadosCartao.cvv === '000') {
+      setMensagemErro("Pagamento recusado pela operadora do cartão (CVV inválido).");
+      setStatus('error');
+      setLoading(false);
+      return;
+    }
 
     const token = localStorage.getItem('token');
     
@@ -36,7 +56,6 @@ export default function Checkout() {
       const ingressosComprados = [];
 
       for (let assento of assentos) {
-  
         const resReserva = await fetch(`${API_URL}/eventos/${evento.id}/reservar`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` }
@@ -51,7 +70,11 @@ export default function Checkout() {
 
         const resCheckout = await fetch(`${API_URL}/eventos/ingressos/${ticketReservado.id}/checkout`, {
           method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          },
+          body: JSON.stringify(dadosCartao)
         });
 
         if (!resCheckout.ok) {
@@ -77,7 +100,11 @@ export default function Checkout() {
     }
   };
 
-  const inputStyle = { backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)', color: 'white' };
+  const inputStyle = { 
+    backgroundColor: 'rgba(255, 255, 255, 0.05)', 
+    borderColor: 'rgba(255, 255, 255, 0.1)', 
+    color: 'white' 
+  };
 
   if (status === 'success') {
     return (
@@ -105,7 +132,7 @@ export default function Checkout() {
         
         <div className="columns is-variable is-6">
           <div className="column is-7">
-            <div className="card p-5">
+            <div className="card p-5" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '12px' }}>
               <h2 className="title is-5 mb-4">Dados do Cartão</h2>
               
               {status === 'error' && (
@@ -116,14 +143,77 @@ export default function Checkout() {
 
               <form onSubmit={handlePagamento}>
                 <div className="field mb-4">
-                  <label className="label is-size-7" style={{ color: 'var(--text-secondary)' }}>Nome no Cartão</label>
+                  <label className="label is-size-7" style={{ color: 'var(--text-secondary)' }}>Nome Impresso no Cartão</label>
                   <div className="control">
-                    <input className="input" type="text" placeholder="JOÃO DA SILVA" style={inputStyle} required />
+                    <input 
+                      className="input" 
+                      type="text" 
+                      name="nome"
+                      placeholder="JOÃO DA SILVA" 
+                      style={inputStyle} 
+                      required 
+                      value={dadosCartao.nome}
+                      onChange={handleInputChange}
+                    />
                   </div>
                 </div>
+
+                <div className="field mb-4">
+                  <label className="label is-size-7" style={{ color: 'var(--text-secondary)' }}>Número do Cartão</label>
+                  <div className="control">
+                    <input 
+                      className="input" 
+                      type="text" 
+                      name="numero"
+                      placeholder="0000 0000 0000 0000" 
+                      maxLength="19"
+                      style={inputStyle} 
+                      required 
+                      value={dadosCartao.numero}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
+
+                <div className="columns is-mobile">
+                  <div className="column field mb-0">
+                    <label className="label is-size-7" style={{ color: 'var(--text-secondary)' }}>Validade</label>
+                    <div className="control">
+                      <input 
+                        className="input" 
+                        type="text" 
+                        name="validade"
+                        placeholder="MM/AA" 
+                        maxLength="5"
+                        style={inputStyle} 
+                        required 
+                        value={dadosCartao.validade}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="column field mb-0">
+                    <label className="label is-size-7" style={{ color: 'var(--text-secondary)' }}>CVV</label>
+                    <div className="control">
+                      <input 
+                        className="input" 
+                        type="text" 
+                        name="cvv"
+                        placeholder="123" 
+                        maxLength="4"
+                        style={inputStyle} 
+                        required 
+                        value={dadosCartao.cvv}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <button 
                   type="submit" 
-                  className={`button is-warning is-fullwidth mt-4 has-text-weight-bold ${loading ? 'is-loading' : ''}`}
+                  className={`button is-warning is-fullwidth mt-5 has-text-weight-bold ${loading ? 'is-loading' : ''}`}
                   style={{ backgroundColor: '#FFD700', border: 'none', color: '#000' }}
                   disabled={loading}
                 >
@@ -134,10 +224,10 @@ export default function Checkout() {
           </div>
 
           <div className="column is-5">
-            <div className="box" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}>
+            <div className="box" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '12px' }}>
               <h2 className="title is-5 mb-4">Resumo do Pedido</h2>
               <p className="has-text-weight-bold">{evento.titulo}</p>
-              <p className="is-size-7 has-text-grey mt-1">Assentos simulados: {assentos.join(', ')}</p>
+              <p className="is-size-7 has-text-grey mt-1">Assentos selecionados: {assentos.join(', ')}</p>
               <hr style={{ backgroundColor: 'var(--border-color)' }} />
               <div className="is-flex is-justify-content-space-between is-align-items-center">
                 <span className="has-text-weight-bold">Total</span>
