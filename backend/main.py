@@ -7,9 +7,14 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Plataforma de Eventos")
 
+origens_permitidas = [
+    "http://localhost:5173", 
+    "https://elite-dev-ticket-plataform-ypp5.vercel.app"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173/, https://elite-dev-ticket-plataform-ypp5.vercel.app/"],
+    allow_origins=origens_permitidas,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
