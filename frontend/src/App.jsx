@@ -7,7 +7,7 @@ import OrganizadorHome from './pages/Organizador_home';
 import PortariaHome from './pages/Portaria_home';
 import MeusIngressos from './pages/client/MeusIngressos';
 import ProtectedRoute from './components/ProtectedRoute';
-import EventoDetalhe from './pages/EventoDetalhe'; 
+import EventoDetalhe from './pages/client/Eventos'; 
 
 function App() {
   return (
