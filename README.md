@@ -10,7 +10,6 @@
 </div>
 
 <br>
-<img src="imagem.png" alt="Exemplo imagem do projeto"> 
 
 > Sistema de gerenciamento de eventos e ingressos desenvolvido para o Desafio Elite Dev. A plataforma permite a criação de eventos via API externa, compra de ingressos com mapa de assentos ou quantidade, e validacao via QR Code na portaria.
 
