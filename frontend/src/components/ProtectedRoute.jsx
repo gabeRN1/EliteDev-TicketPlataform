@@ -30,6 +30,6 @@ export default function ProtectedRoute({ allowedRoles }) {
     }
   }
 
-  // Se estiver tudo certo, renderiza a tela normalmente
+
   return <Outlet />;
 }
