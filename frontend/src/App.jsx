@@ -7,6 +7,7 @@ import OrganizadorHome from './pages/Organizador_home';
 import PortariaHome from './pages/Portaria_home';
 import MeusIngressos from './pages/client/MeusIngressos';
 import ProtectedRoute from './components/ProtectedRoute';
+import EventoDetalhe from './pages/EventoDetalhe'; 
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/evento/:id" element={<EventoDetalhe />} />
 
         <Route element={<ProtectedRoute allowedRoles={['cliente']} />}>
           <Route path="/meus-ingressos" element={<MeusIngressos />} />

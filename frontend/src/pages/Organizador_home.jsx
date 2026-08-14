@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { API_URL } from '../config';
+
 export default function OrganizadorHome({ perfil }) {
   const [abaAtiva, setAbaAtiva] = useState('dashboard');
-
   const [usuarios, setUsuarios] = useState([]);
   const [eventos, setEventos] = useState([]);
 
@@ -20,17 +20,33 @@ export default function OrganizadorHome({ perfil }) {
   };
   const [eventoForm, setEventoForm] = useState(eventoSchemaInicial);
   const [modalAberto, setModalAberto] = useState(false);
-  const [buscaEvento, setBuscaEvento] = useState('');
 
   const carregarDados = async () => {
+    const token = localStorage.getItem('token');
+    
     try {
-      const [resEventos, resUsuarios] = await Promise.all([
-        fetch(`${API_URL}/api/eventos`),
-        fetch(`${API_URL}/api/usuarios`)
-      ]);
+      // Ajustado para buscar na rota correta do backend e enviando o token
+      const resEventos = await fetch(`${API_URL}/eventos/meus-eventos`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (resEventos.ok) {
+        setEventos(await resEventos.json());
+      } else {
+        console.error("Erro ao buscar eventos:", await resEventos.text());
+      }
 
-      if (resEventos.ok) setEventos(await resEventos.json());
+      /* 
+       * AVISO: A rota de listar usuários não existe no backend fornecido.
+       * Estou deixando comentada para não gerar erro 404
+       */
+      /*
+      const resUsuarios = await fetch(`${API_URL}/usuarios`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (resUsuarios.ok) setUsuarios(await resUsuarios.json());
+      */
+      
     } catch (err) {
       console.error("Erro ao carregar dados:", err);
     }
@@ -40,23 +56,10 @@ export default function OrganizadorHome({ perfil }) {
     carregarDados();
   }, []);
 
-  const handleAlterarRole = async (userId, novaRole) => {
-    try {
-      const res = await fetch(`/api/usuarios/${userId}/role`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: novaRole })
-      });
-      if (res.ok) {
-        setUsuarios(prev => prev.map(u => u.id === userId ? { ...u, role: novaRole } : u));
-      }
-    } catch (err) {
-      console.error("Erro ao alterar role:", err);
-    }
-  };
-
   const salvarEvento = async (e) => {
     e.preventDefault();
+    const token = localStorage.getItem('token');
+    
     const payload = {
       ...eventoForm,
       preco: parseFloat(eventoForm.preco),
@@ -66,9 +69,12 @@ export default function OrganizadorHome({ perfil }) {
     };
 
     try {
-      const response = await fetch('${API_URL}/eventos', {
+      const response = await fetch(`${API_URL}/eventos/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(payload)
       });
 
@@ -77,6 +83,8 @@ export default function OrganizadorHome({ perfil }) {
         setModalAberto(false);
         setEventoForm(eventoSchemaInicial);
         carregarDados(); 
+      } else {
+        alert('Erro ao salvar evento. Verifique os dados.');
       }
     } catch (err) {
       console.error("Erro ao criar evento:", err);
@@ -159,14 +167,20 @@ export default function OrganizadorHome({ perfil }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {eventos.map(ev => (
-                    <tr key={ev.id}>
-                      <td className="has-text-white">{ev.titulo}</td>
-                      <td className="has-text-white">R$ {ev.preco.toFixed(2)}</td>
-                      <td className="has-text-white">{ev.capacidade_total - ev.ingressos_disponiveis} / {ev.capacidade_total}</td>
-                      <td className="has-text-white">{ev.ingressos_disponiveis}</td>
+                  {eventos.length > 0 ? (
+                    eventos.map(ev => (
+                      <tr key={ev.id}>
+                        <td className="has-text-white">{ev.titulo}</td>
+                        <td className="has-text-white">R$ {ev.preco.toFixed(2)}</td>
+                        <td className="has-text-white">{ev.capacidade_total - ev.ingressos_disponiveis} / {ev.capacidade_total}</td>
+                        <td className="has-text-white">{ev.ingressos_disponiveis}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4" className="has-text-centered has-text-grey mt-4">Nenhum evento encontrado.</td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
@@ -174,40 +188,14 @@ export default function OrganizadorHome({ perfil }) {
         )}
 
         {abaAtiva === 'usuarios' && (
-          <div className="box" style={{ backgroundColor: '#151B2B' }}>
-            <table className="table is-fullwidth" style={{ backgroundColor: 'transparent' }}>
-              <thead>
-                <tr>
-                  <th className="has-text-grey">ID</th>
-                  <th className="has-text-grey">Nome</th>
-                  <th className="has-text-grey">E-mail</th>
-                  <th className="has-text-grey">Role</th>
-                </tr>
-              </thead>
-              <tbody>
-                {usuarios.map(u => (
-                  <tr key={u.id}>
-                    <td className="has-text-grey">#{u.id}</td>
-                    <td className="has-text-white">{u.nome}</td>
-                    <td className="has-text-grey-light">{u.email}</td>
-                    <td>
-                      <select 
-                        value={u.role} 
-                        onChange={(e) => handleAlterarRole(u.id, e.target.value)}
-                        style={{ backgroundColor: '#151B2B', color: 'white' }}
-                      >
-                        <option value="cliente">cliente</option>
-                        <option value="portaria">portaria</option>
-                        <option value="organizador">organizador</option>
-                      </select>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="box has-text-centered" style={{ backgroundColor: '#151B2B', padding: '40px' }}>
+             <p className="has-text-warning">
+               A visualização de usuários não está disponível, pois a rota correspondente ainda não foi criada no backend.
+             </p>
           </div>
         )}
 
+        {/* Modal de Criação */}
         <div className={`modal ${modalAberto ? 'is-active' : ''}`}>
           <div className="modal-background" onClick={() => setModalAberto(false)}></div>
           <div className="modal-card" style={{ maxWidth: '600px' }}>
