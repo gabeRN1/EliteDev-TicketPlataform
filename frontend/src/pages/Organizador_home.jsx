@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
+import { API_URL } from '../config';
 export default function OrganizadorHome({ perfil }) {
   const [abaAtiva, setAbaAtiva] = useState('dashboard');
 
@@ -25,8 +25,8 @@ export default function OrganizadorHome({ perfil }) {
   const carregarDados = async () => {
     try {
       const [resEventos, resUsuarios] = await Promise.all([
-        fetch('/api/eventos'),
-        fetch('/api/usuarios')
+        fetch('${API_URL}/api/eventos'),
+        fetch('${API_URL}/api/usuarios')
       ]);
 
       if (resEventos.ok) setEventos(await resEventos.json());
@@ -66,7 +66,7 @@ export default function OrganizadorHome({ perfil }) {
     };
 
     try {
-      const response = await fetch('/api/eventos', {
+      const response = await fetch('${API_URL}/eventos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

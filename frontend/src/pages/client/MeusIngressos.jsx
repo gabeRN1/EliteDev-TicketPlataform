@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-
+import { API_URL } from '../../config';
 export default function MeusIngressos() {
   const [ingressos, setIngressos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -9,16 +9,25 @@ export default function MeusIngressos() {
 
   useEffect(() => {
     const buscarMeusIngressos = async () => {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        setErro("Você precisa fazer login para ver seus ingressos.");
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
-        const response = await fetch('/api/meus-ingressos');
+        const response = await fetch('${API_URL}/eventos/ingressos/meus-ingressos', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
         
         if (!response.ok) {
           throw new Error('Não foi possível carregar seus ingressos.');
         }
 
         const data = await response.json();
-
         setIngressos(data);
       } catch (err) {
         setErro(err.message);
@@ -42,12 +51,12 @@ export default function MeusIngressos() {
         
         <div className="is-flex is-justify-content-space-between is-align-items-flex-end mb-5">
           <h1 className="title is-3 mb-0">Meus Ingressos</h1>
-          <Link to="/" className="button is-light is-small is-rounded">Comprar mais ingressos</Link>
+          <Link to="/" className="button is-light is-small is-rounded">Explorar Eventos</Link>
         </div>
 
         <div className="columns is-multiline">
           {ingressos.map((ingresso) => {
-            const isUtilizado = ingresso.status?.toLowerCase() === 'utilizado';
+            const isUtilizado = ingresso.status === 'utilizado';
 
             return (
               <div key={ingresso.id} className="column is-12-mobile is-6-tablet is-6-desktop mb-4">
@@ -59,126 +68,69 @@ export default function MeusIngressos() {
                     borderRadius: '12px', 
                     border: '1px solid rgba(255,255,255,0.05)',
                     opacity: isUtilizado ? 0.6 : 1,
-                    overflow: 'hidden',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s ease, border-color 0.2s ease'
+                    cursor: 'pointer'
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--link)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.transform = 'none' }}
                 >
-                  
-                  <div 
-                    className="is-hidden-mobile"
-                    style={{ 
-                      width: '120px', 
-                      backgroundImage: `url(${ingresso.evento?.imagem_url || 'https://via.placeholder.com/120'})`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center'
-                    }}
-                  ></div>
-
                   <div className="p-4 is-flex-grow-1">
                     <div className="is-flex is-justify-content-space-between is-align-items-center mb-2">
-                      <span className={`tag is-small ${isUtilizado ? 'is-dark' : 'is-success is-light'}`}>
-                        {ingresso.status || 'Válido'}
+                      <span className={`tag is-small ${isUtilizado ? 'is-dark' : ingresso.status === 'pendente' ? 'is-warning' : 'is-success is-light'}`}>
+                        {ingresso.status.toUpperCase()}
                       </span>
                     </div>
-                    
-                    <h2 className="title is-5 mb-1 has-text-white">{ingresso.evento?.titulo}</h2>
-                    <p className="is-size-7 has-text-grey-light mb-1">📅 {ingresso.evento?.data_evento ? new Date(ingresso.evento.data_evento).toLocaleString('pt-BR') : 'Data não informada'}</p>
-                    <p className="is-size-7 has-text-grey-light mb-3">📍 {ingresso.evento?.local}</p>
-                    
-                    <div className="box p-2 mb-0" style={{ backgroundColor: 'rgba(0,0,0,0.2)', border: 'none' }}>
-                      <p className="is-size-7 has-text-white"><strong>Assento(s):</strong> {ingresso.assentos}</p>
+                    <h2 className="title is-5 mb-1 has-text-white">Ingresso #{ingresso.id}</h2>
+                    <p className="is-size-7 has-text-grey-light mb-3">Evento ID: {ingresso.evento_id}</p>
+                  </div>
+                  
+                  {ingresso.qr_code && (
+                    <div className="p-4 is-flex is-flex-direction-column is-align-items-center is-justify-content-center" style={{ borderLeft: '2px dashed rgba(255,255,255,0.1)' }}>
+                      <figure className="image is-64x64 mb-2" style={{ backgroundColor: '#FFF', padding: '4px', borderRadius: '4px' }}>
+                        <img 
+                          src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${ingresso.qr_code}`} 
+                          alt="Mini QR Code" 
+                          style={{ filter: isUtilizado ? 'grayscale(100%) blur(1px)' : 'none' }}
+                        />
+                      </figure>
+                      <p className="is-size-7 has-text-centered has-text-link has-text-weight-bold">Ampliar QR</p>
                     </div>
-                  </div>
-
-                  <div 
-                    className="p-4 is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
-                    style={{ borderLeft: '2px dashed rgba(255,255,255,0.1)' }}
-                  >
-                    <figure className="image is-64x64 mb-2" style={{ backgroundColor: '#FFF', padding: '4px', borderRadius: '4px' }}>
-                      <img 
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${ingresso.id}`} 
-                        alt="Mini QR Code" 
-                        style={{ filter: isUtilizado ? 'grayscale(100%) blur(1px)' : 'none' }}
-                      />
-                    </figure>
-                    <p className="is-size-7 has-text-centered has-text-link has-text-weight-bold">
-                      Ampliar QR
-                    </p>
-                  </div>
-
+                  )}
                 </div>
               </div>
             );
           })}
         </div>
 
-        {ingressos.length === 0 && (
-          <div className="has-text-centered py-6">
-            <p className="has-text-grey mb-4">Você ainda não possui ingressos.</p>
-            <Link to="/" className="button is-link">Explorar Eventos</Link>
-          </div>
-        )}
-
       </div>
 
+      
       {ingressoSelecionado && (
         <div className="modal is-active">
           <div className="modal-background" onClick={fecharModal} style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}></div>
-          
           <div className="modal-content px-4">
-            <div className="box has-text-centered" style={{ backgroundColor: 'var(--bg-surface, #151B2B)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div className="box has-text-centered" style={{ backgroundColor: 'var(--bg-surface, #151B2B)', borderRadius: '16px' }}>
+              <h2 className="title is-4 mb-2 has-text-white">Ingresso #{ingressoSelecionado.id}</h2>
               
-              <h2 className="title is-4 mb-2 has-text-white">{ingressoSelecionado.evento?.titulo}</h2>
-              <p className="subtitle is-6 has-text-grey-light mb-5">
-                {ingressoSelecionado.evento?.data_evento ? new Date(ingressoSelecionado.evento.data_evento).toLocaleString('pt-BR') : ''} 
-                {ingressoSelecionado.evento?.local ? ` • ${ingressoSelecionado.evento.local}` : ''}
-              </p>
-
-              <figure className="image is-inline-block mb-5" style={{ backgroundColor: '#FFF', padding: '16px', borderRadius: '12px' }}>
-                <img 
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${ingressoSelecionado.id}`} 
-                  alt="QR Code Ampliado" 
-                  style={{ 
-                    width: '250px', 
-                    height: '250px',
-                    filter: ingressoSelecionado.status?.toLowerCase() === 'utilizado' ? 'grayscale(100%) blur(1px)' : 'none' 
-                  }}
-                />
-              </figure>
-
-              <div>
-                <p className="is-size-7 has-text-grey mb-2 is-uppercase">Ou digite o código abaixo na catraca:</p>
-                <div 
-                  className="is-inline-block p-3" 
-                  style={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)', 
-                    border: '1px dashed rgba(255, 255, 255, 0.3)',
-                    borderRadius: '8px',
-                    minWidth: '200px'
-                  }}
-                >
-                  <span className="is-size-4 has-text-weight-bold has-text-white" style={{ letterSpacing: '2px' }}>
-                    {ingressoSelecionado.id}
-                  </span>
-                </div>
-              </div>
+              {ingressoSelecionado.qr_code ? (
+                <figure className="image is-inline-block mb-5" style={{ backgroundColor: '#FFF', padding: '16px', borderRadius: '12px' }}>
+                  <img 
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${ingressoSelecionado.qr_code}`} 
+                    alt="QR Code Ampliado" 
+                    style={{ width: '250px', height: '250px', filter: ingressoSelecionado.status === 'utilizado' ? 'grayscale(100%) blur(1px)' : 'none' }}
+                  />
+                </figure>
+              ) : (
+                <p className="has-text-warning mb-5">QR Code indisponível para este status.</p>
+              )}
               
-              {ingressoSelecionado.status?.toLowerCase() === 'utilizado' && (
+              {ingressoSelecionado.status === 'utilizado' && (
                 <div className="notification is-danger is-light mt-5 mb-0 py-2">
-                  Este ingresso já foi utilizado.
+                  Este ingresso já foi utilizado na portaria.
                 </div>
               )}
-
             </div>
           </div>
-          
           <button className="modal-close is-large" aria-label="close" onClick={fecharModal}></button>
         </div>
       )}
-
     </div>
   );
 }

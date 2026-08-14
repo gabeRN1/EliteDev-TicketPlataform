@@ -1,31 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-
+import { API_URL } from '../../config';
 const formatadorMoeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
 export default function EventoDetalhe() {
   const { id } = useParams();
   const navigate = useNavigate();
+  
   const [evento, setEvento] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [erro, setErro] = useState(null);  
+  const [erro, setErro] = useState(null);
   const [assentosSelecionados, setAssentosSelecionados] = useState([]);
   
-  
+
   const fileiras = ['A', 'B', 'C', 'D', 'E'];
   const colunas = [1, 2, 3, 4, 5, 6, 7, 8];
   const assentosOcupados = ['A2', 'A3', 'C5', 'D8', 'E1']; 
 
   useEffect(() => {
-    // Busca do evento pelo ID na API em FastAPI
     const buscarEvento = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/eventos/${id}`);
+     
+        const response = await fetch(`${API_URL}/eventos/${id}`);
         
-        if (!response.ok) {
-          throw new Error('Evento não encontrado ou erro no servidor.');
-        }
+        if (!response.ok) throw new Error('Evento não encontrado.');
         
         const data = await response.json();
         setEvento(data);
@@ -41,11 +40,8 @@ export default function EventoDetalhe() {
 
   const toggleAssento = (assentoId) => {
     if (assentosOcupados.includes(assentoId)) return;
-    
     setAssentosSelecionados(prev => 
-      prev.includes(assentoId)
-        ? prev.filter(a => a !== assentoId)
-        : [...prev, assentoId]
+      prev.includes(assentoId) ? prev.filter(a => a !== assentoId) : [...prev, assentoId]
     );
   };
 
@@ -65,28 +61,26 @@ export default function EventoDetalhe() {
     <div className="section pt-5">
       <div className="container px-4">
         <div className="columns is-variable is-6">
-          
-     
           <div className="column is-5">
             <figure className="image is-4by3 mb-4" style={{ borderRadius: '12px', overflow: 'hidden' }}>
-              <img src={evento.imagem_url} alt={evento.titulo} style={{ objectFit: 'cover' }} />
+              <img src={evento.imagem_url || "https://via.placeholder.com/800"} alt={evento.titulo} style={{ objectFit: 'cover' }} />
             </figure>
             <h1 className="title is-3 mb-2">{evento.titulo}</h1>
             <p className="subtitle is-5 has-text-grey mb-4">{evento.local}</p>
             <div className="box" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}>
               <p><strong>Data:</strong> {new Date(evento.data_evento).toLocaleString('pt-BR')}</p>
-              <p><strong>Valor por ingresso:</strong> {formatadorMoeda.format(evento.preco)}</p>
+              <p><strong>Valor:</strong> {formatadorMoeda.format(evento.preco)}</p>
+              <p><strong>Disponíveis:</strong> {evento.ingressos_disponiveis}</p>
             </div>
           </div>
 
+          {/* Mapa de Assentos */}
           <div className="column is-7">
             <h2 className="title is-4 mb-5">Selecione seus lugares</h2>
-            
             <div className="box has-text-centered pb-6" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}>
               <div className="mb-5 p-2 has-text-grey-light is-size-7" style={{ borderBottom: '2px solid var(--border-color)', margin: '0 auto', width: '80%' }}>
                 PALCO / TELA
               </div>
-
               <div className="is-inline-block has-text-left">
                 {fileiras.map(fileira => (
                   <div key={fileira} className="is-flex is-align-items-center is-justify-content-center mb-2">
@@ -96,7 +90,6 @@ export default function EventoDetalhe() {
                       const isOcupado = assentosOcupados.includes(assentoId);
                       const isSelecionado = assentosSelecionados.includes(assentoId);
                       
-                   
                       let btnClass = "button is-small mx-1 p-0 ";
                       if (isOcupado) btnClass += "is-static has-background-danger-light has-text-danger";
                       else if (isSelecionado) btnClass += "is-link";
@@ -118,30 +111,21 @@ export default function EventoDetalhe() {
                   </div>
                 ))}
               </div>
-              
-
-              <div className="is-flex is-justify-content-center mt-5" style={{ gap: '15px' }}>
-                <span className="is-size-7 is-flex is-align-items-center"><div className="has-background-light mr-2" style={{width:'12px', height:'12px', borderRadius:'2px'}}></div> Livre</span>
-                <span className="is-size-7 is-flex is-align-items-center"><div className="has-background-link mr-2" style={{width:'12px', height:'12px', borderRadius:'2px'}}></div> Selecionado</span>
-                <span className="is-size-7 is-flex is-align-items-center"><div className="has-background-danger mr-2" style={{width:'12px', height:'12px', borderRadius:'2px'}}></div> Ocupado</span>
-              </div>
             </div>
 
-            
-            <div className="is-flex is-justify-content-space-between is-align-items-center">
+            <div className="is-flex is-justify-content-space-between is-align-items-center mt-4">
               <div>
                 <p className="is-size-7 has-text-grey">Total a pagar:</p>
                 <p className="title is-4 mb-0 has-text-link">{formatadorMoeda.format(assentosSelecionados.length * evento.preco)}</p>
               </div>
               <button 
                 className="button is-link is-medium" 
-                disabled={assentosSelecionados.length === 0}
+                disabled={assentosSelecionados.length === 0 || evento.ingressos_disponiveis < assentosSelecionados.length}
                 onClick={irParaCheckout}
               >
                 Ir para o Pagamento
               </button>
             </div>
-
           </div>
         </div>
       </div>

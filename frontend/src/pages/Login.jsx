@@ -1,15 +1,47 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
+import { API_URL } from '../config';
 export default function Login() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    console.log('Login:', { email, senha });
-    navigate('/');
+    setLoading(true);
+    setErro('');
+
+    try {
+      const formData = new URLSearchParams();
+      formData.append('username', email);
+      formData.append('password', senha);
+
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.detail || 'E-mail ou senha incorretos');
+      }
+
+      const data = await response.json();
+      
+    
+      localStorage.setItem('token', data.access_token);
+    
+      navigate('/');
+    } catch (error) {
+      setErro(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const inputStyle = {
@@ -26,6 +58,8 @@ export default function Login() {
           <div className="card-content">
             <h1 className="title is-4 has-text-centered mb-5">Bem-vindo de volta</h1>
             
+            {erro && <div className="notification is-danger is-light mb-4 py-2 px-3 is-size-7">{erro}</div>}
+
             <form onSubmit={handleLogin}>
               <div className="field mb-4">
                 <label className="label has-text-weight-normal is-size-7" style={{ color: 'var(--text-secondary)' }}>
@@ -40,6 +74,7 @@ export default function Login() {
                     onChange={(e) => setEmail(e.target.value)}
                     style={inputStyle}
                     required
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -60,6 +95,7 @@ export default function Login() {
                     onChange={(e) => setSenha(e.target.value)}
                     style={inputStyle}
                     required
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -67,8 +103,9 @@ export default function Login() {
               <div className="control mt-5">
                 <button 
                   type="submit" 
-                  className="button is-warning is-rounded is-fullwidth has-text-weight-bold"
+                  className={`button is-warning is-rounded is-fullwidth has-text-weight-bold ${loading ? 'is-loading' : ''}`}
                   style={{ backgroundColor: '#FFD700', border: 'none', color: '#000' }}
+                  disabled={loading}
                 >
                   Entrar
                 </button>

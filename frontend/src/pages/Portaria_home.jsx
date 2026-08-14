@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
-
+import { API_URL } from '../config';
 export default function PortariaHome({ usuario, eventoId = 1 }) {
   const porteiro = usuario || {
     id: 0,
@@ -61,7 +61,7 @@ export default function PortariaHome({ usuario, eventoId = 1 }) {
     }
 
     try {
-      const response = await fetch('/api/ingressos/validar', {
+      const response = await fetch('${API_URL}/ingressos/validar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

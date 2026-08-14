@@ -1,16 +1,43 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
+import { API_URL } from '../config';
 export default function Register() {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState('');
   const navigate = useNavigate();
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    console.log('Registro:', { nome, email, senha });
-    navigate('/login');
+    setLoading(true);
+    setErro('');
+
+    try {
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          nome, 
+          email, 
+          senha,
+          role: 'cliente' 
+        }),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.detail || 'Erro ao criar a conta. Tente novamente.');
+      }
+      navigate('/login');
+    } catch (error) {
+      setErro(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const inputStyle = {
@@ -27,6 +54,8 @@ export default function Register() {
           <div className="card-content">
             <h1 className="title is-4 has-text-centered mb-5">Criar Conta</h1>
             
+            {erro && <div className="notification is-danger is-light mb-4 py-2 px-3 is-size-7">{erro}</div>}
+
             <form onSubmit={handleRegister}>
               
               <div className="field mb-4">
@@ -42,6 +71,7 @@ export default function Register() {
                     onChange={(e) => setNome(e.target.value)}
                     style={inputStyle}
                     required
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -59,6 +89,7 @@ export default function Register() {
                     onChange={(e) => setEmail(e.target.value)}
                     style={inputStyle}
                     required
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -76,6 +107,7 @@ export default function Register() {
                     onChange={(e) => setSenha(e.target.value)}
                     style={inputStyle}
                     required
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -83,8 +115,9 @@ export default function Register() {
               <div className="control mt-5">
                 <button 
                   type="submit" 
-                  className="button is-warning is-rounded is-fullwidth has-text-weight-bold"
+                  className={`button is-warning is-rounded is-fullwidth has-text-weight-bold ${loading ? 'is-loading' : ''}`}
                   style={{ backgroundColor: '#FFD700', border: 'none', color: '#000' }}
+                  disabled={loading}
                 >
                   Cadastrar
                 </button>

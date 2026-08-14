@@ -1,20 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { API_URL } from '../config';
 
 export default function Home() {
   const [eventos, setEventos] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+useEffect(() => {
+    console.log("URL da API:", API_URL);
     const fetchEventos = async () => {
       try {
-        const response = await fetch('/api/eventos');
-        if (response.ok) {
-          const data = await response.json();
-          setEventos(data);
+        const response = await fetch(`${API_URL}/eventos/`);
+
+        if (!response.ok) {
+        
+          const errorData = await response.json().catch(() => response.text());
+          
+          console.error(`Erro ${response.status} retornado pelo servidor:`, errorData);
+          return;
         }
+
+        const data = await response.json();
+        setEventos(data);
+
       } catch (error) {
-        console.error("Erro ao buscar eventos:", error);
+        console.error("Erro de rede/conexão ao buscar eventos:", error);
       } finally {
         setLoading(false);
       }
@@ -22,7 +32,6 @@ export default function Home() {
 
     fetchEventos();
   }, []);
-
   const destaques = eventos.slice(0, 3);
   const emAlta = eventos.filter(ev => ev.ingressos_disponiveis > 0);
 

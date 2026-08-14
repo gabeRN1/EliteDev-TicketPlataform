@@ -1,44 +1,37 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-
-// Componentes Globais
-import Navbar from './components/Navabar';
-
-// Páginas Gerais
+import { Routes, Route } from 'react-router-dom'
+import Navbar from './components/Navabar'
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-
-// Páginas do Cliente (Subpasta)
-import Eventos from './pages/client/Eventos';
-import Checkout from './pages/client/Checkout';
-import MeusIngressos from './pages/client/MeusIngressos';
-// Páginas de Perfis Específicos
 import OrganizadorHome from './pages/Organizador_home';
 import PortariaHome from './pages/Portaria_home';
+import MeusIngressos from './pages/client/MeusIngressos';
+import ProtectedRoute from './components/ProtectedRoute';
 
-export default function App() {
+function App() {
   return (
     <>
       <Navbar />
-      <main>
-        <Routes>
-          {/* Rotas Públicas */}
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          
-          {/* Rotas do Cliente */}
-          <Route path="/evento/:id" element={<Eventos />} />
-          <Route path="/checkout" element={<Checkout />} />
-             <Route path="/meus-ingressos" element={<MeusIngressos />} />
-          {/* Rotas do Organizador */}
-          <Route path="/organizador" element={<OrganizadorHome />} />
+      
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-          {/* Rotas da Portaria */}
+        <Route element={<ProtectedRoute allowedRoles={['cliente']} />}>
+          <Route path="/meus-ingressos" element={<MeusIngressos />} />
+        </Route>
+
+        <Route element={<ProtectedRoute allowedRoles={['organizador']} />}>
+          <Route path="/painel-organizador" element={<OrganizadorHome />} />
+        </Route>
+
+        <Route element={<ProtectedRoute allowedRoles={['portaria', 'organizador']} />}>
           <Route path="/portaria" element={<PortariaHome />} />
-        </Routes>
-      </main>
+        </Route>
+      </Routes>
     </>
   );
 }
+
+export default App;
