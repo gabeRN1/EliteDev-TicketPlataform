@@ -6,7 +6,9 @@ export default function MeusIngressos() {
   const [ingressos, setIngressos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState(null);
+  
   const [ingressoSelecionado, setIngressoSelecionado] = useState(null);
+  const [mensagemCopiado, setMensagemCopiado] = useState(''); 
 
   useEffect(() => {
     const buscarDados = async () => {
@@ -20,7 +22,6 @@ export default function MeusIngressos() {
 
       try {
         setLoading(true);
-        
         
         const [resIngressos, resEventos] = await Promise.all([
           fetch(`${API_URL}/eventos/ingressos/meus-ingressos`, {
@@ -40,7 +41,6 @@ export default function MeusIngressos() {
           mapaEventos[evento.id] = evento;
         });
 
-     
         const ingressosCompletos = dataIngressos.map(ingresso => ({
           ...ingresso,
           evento_detalhe: mapaEventos[ingresso.evento_id] || { titulo: 'Evento Indisponível' }
@@ -57,8 +57,45 @@ export default function MeusIngressos() {
     buscarDados();
   }, []);
 
-  const abrirModal = (ingresso) => setIngressoSelecionado(ingresso);
-  const fecharModal = () => setIngressoSelecionado(null);
+  const abrirModal = (ingresso) => {
+    setIngressoSelecionado(ingresso);
+    setMensagemCopiado('');
+  };
+
+  const fecharModal = () => {
+    setIngressoSelecionado(null);
+    setMensagemCopiado('');
+  };
+
+  const compartilharIngresso = async () => {
+    if (!ingressoSelecionado) return;
+
+  
+    const linkCompartilhamento = `${window.location.origin}/ingresso/${ingressoSelecionado.id}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Meu Ingresso - TicketPlatform',
+          text: `Olha o meu ingresso para o evento ${ingressoSelecionado.evento_detalhe.titulo}!`,
+          url: linkCompartilhamento,
+        });
+      } catch (error) {
+        console.log('Compartilhamento cancelado ou falhou', error);
+      }
+    } else {
+    
+      try {
+        await navigator.clipboard.writeText(linkCompartilhamento);
+        setMensagemCopiado('Link copiado com sucesso!');
+        setTimeout(() => {
+          setMensagemCopiado('');
+        }, 3000);
+      } catch (err) {
+        console.error('Falha ao copiar texto: ', err);
+      }
+    }
+  };
 
   if (loading) return <div className="section has-text-centered pt-6"><p>Carregando ingressos...</p></div>;
   if (erro) return <div className="section has-text-centered pt-6 has-text-danger"><p>{erro}</p></div>;
@@ -128,6 +165,7 @@ export default function MeusIngressos() {
 
       </div>
 
+      {/* Modal de Detalhes do Ingresso */}
       {ingressoSelecionado && (
         <div className="modal is-active">
           <div className="modal-background" onClick={fecharModal} style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}></div>
@@ -153,6 +191,18 @@ export default function MeusIngressos() {
                   Este ingresso já foi utilizado na portaria.
                 </div>
               )}
+              <div className="mt-4">
+                <button 
+                  className="button is-link is-outlined is-fullwidth" 
+                  onClick={compartilharIngresso}
+                >
+                  🔗 Compartilhar Link do Ingresso
+                </button>
+                {mensagemCopiado && (
+                  <p className="has-text-success is-size-7 mt-2">{mensagemCopiado}</p>
+                )}
+              </div>
+
             </div>
           </div>
           <button className="modal-close is-large" aria-label="close" onClick={fecharModal}></button>

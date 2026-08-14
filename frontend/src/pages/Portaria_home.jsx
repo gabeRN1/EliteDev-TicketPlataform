@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { API_URL } from '../config';
+
 export default function PortariaHome({ usuario, eventoId = 1 }) {
   const porteiro = usuario || {
     id: 0,
@@ -61,9 +62,16 @@ export default function PortariaHome({ usuario, eventoId = 1 }) {
     }
 
     try {
-      const response = await fetch(`${API_URL}/ingressos/validar`, {
+      
+      const token = localStorage.getItem('token');
+      
+    
+      const response = await fetch(`${API_URL}/eventos/ingressos/validar`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
         body: JSON.stringify({
           evento_id: eventoId,
           qr_code: codigo
@@ -74,7 +82,7 @@ export default function PortariaHome({ usuario, eventoId = 1 }) {
 
       if (response.ok) {
         setResultadoValidacao({
-          status: ticketData.status, // TicketStatus do backend
+          status: ticketData.status, 
           titulo: ticketData.status === 'aprovado' ? 'Acesso Liberado' : 'Validação',
           mensagem: `Ingresso de ID #${ticketData.id}`,
           codigo: codigo,
@@ -177,7 +185,6 @@ export default function PortariaHome({ usuario, eventoId = 1 }) {
           </form>
         </div>
       </div>
-
 
       <div className={`modal ${modalAberto ? 'is-active' : ''}`}>
         <div className="modal-background" onClick={fecharModalEContinuar}></div>
