@@ -8,14 +8,14 @@ export default function Login() {
   const [erro, setErro] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setErro('');
 
     try {
       const formData = new URLSearchParams();
-      formData.append('username', email);
+      formData.append('username', email); 
       formData.append('password', senha);
 
       const response = await fetch(`${API_URL}/auth/login`, {
@@ -32,11 +32,10 @@ export default function Login() {
       }
 
       const data = await response.json();
-      
-    
+   
       localStorage.setItem('token', data.access_token);
-    
       navigate('/');
+      
     } catch (error) {
       setErro(error.message);
     } finally {
