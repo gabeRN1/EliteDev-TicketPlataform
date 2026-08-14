@@ -25,8 +25,8 @@ export default function OrganizadorHome({ perfil }) {
   const carregarDados = async () => {
     try {
       const [resEventos, resUsuarios] = await Promise.all([
-        fetch('${API_URL}/api/eventos'),
-        fetch('${API_URL}/api/usuarios')
+        fetch(`${API_URL}/api/eventos`),
+        fetch(`${API_URL}/api/usuarios`)
       ]);
 
       if (resEventos.ok) setEventos(await resEventos.json());

@@ -61,7 +61,7 @@ export default function PortariaHome({ usuario, eventoId = 1 }) {
     }
 
     try {
-      const response = await fetch('${API_URL}/ingressos/validar', {
+      const response = await fetch(`${API_URL}/ingressos/validar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
