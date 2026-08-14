@@ -1,7 +1,6 @@
 # Plataforma de Eventos e Ingressos - Desafio Elite Dev
 
 <div align="center">
-  <!-- Badges das Tecnologias -->
   <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React">
   <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
   <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI">
@@ -14,6 +13,43 @@
 <img src="imagem.png" alt="Exemplo imagem do projeto"> 
 
 > Sistema de gerenciamento de eventos e ingressos desenvolvido para o Desafio Elite Dev. A plataforma permite a criação de eventos via API externa, compra de ingressos com mapa de assentos ou quantidade, e validacao via QR Code na portaria.
+
+---
+
+## Telas do Sistema
+
+### Acesso e Navegação Geral
+<img width="1366" height="695" alt="login" src="https://github.com/user-attachments/assets/ebe21fb8-1a35-478c-bff4-ad640e3bda9f" />
+<img width="1366" height="696" alt="Home" src="https://github.com/user-attachments/assets/651e058d-8f7e-4ad7-9515-e365cacfc06c" />
+<img width="1366" height="697" alt="resultados" src="https://github.com/user-attachments/assets/26930434-a01e-4ec0-bc77-844831461bc3" />
+<img width="1366" height="697" alt="resultadosfail" src="https://github.com/user-attachments/assets/bca6ba92-8444-446f-bbfe-9c4f84b2cb81" />
+
+---
+
+### Área do Organizador e Administração
+<img width="1366" height="698" alt="Dashboard_organizador" src="https://github.com/user-attachments/assets/442b5cc5-4ccb-4621-89c4-93661b6b0226" />
+<img width="1366" height="698" alt="cadastro_evento" src="https://github.com/user-attachments/assets/d831c2be-adfd-4315-b254-2a218720a7ad" />
+<img width="1366" height="695" alt="evento_organizador" src="https://github.com/user-attachments/assets/df6edc65-3568-4059-9f44-27b6db7660cf" />
+<img width="1366" height="696" alt="rota_users" src="https://github.com/user-attachments/assets/e5170e37-25ef-4011-928d-c0b0639e891e" />
+
+---
+
+### Fluxo do Cliente: Compra e Ingressos
+<img width="1366" height="695" alt="compra_ingresso" src="https://github.com/user-attachments/assets/0563b7f1-9e90-4f35-86e0-37b99b9f07e4" />
+<img width="1366" height="694" alt="compra_card" src="https://github.com/user-attachments/assets/04bb5e43-3e95-4887-9703-c699a652bb0b" />
+<img width="1366" height="697" alt="aprovado" src="https://github.com/user-attachments/assets/f7c9f3c6-a1cd-4970-b572-05fb769e6f77" />
+<img width="1366" height="695" alt="compra_recusada" src="https://github.com/user-attachments/assets/26bf3b91-4dda-426c-b30f-31407711a433" />
+<img width="1366" height="694" alt="meus-ingressos" src="https://github.com/user-attachments/assets/5db07587-2369-442c-be8a-9529aff93917" />
+<img width="1366" height="694" alt="ingresso" src="https://github.com/user-attachments/assets/7ecaafd8-7fda-48ed-bc79-3a6ce70201a8" />
+
+---
+
+### Portaria e Validação
+<img width="1366" height="695" alt="portaria" src="https://github.com/user-attachments/assets/7e7d1496-72c4-4410-9073-4e0492212348" />
+<img width="1366" height="696" alt="confirma_qrcode" src="https://github.com/user-attachments/assets/5ff4b444-8af4-47ec-9b2d-50ef33fa3e0d" />
+<img width="1366" height="696" alt="ingressoinvalido" src="https://github.com/user-attachments/assets/bf8158f0-c68f-42f7-a2db-1e04a745db00" />
+
+---
 
 ## Visao Geral do Projeto
 
