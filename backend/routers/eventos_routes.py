@@ -8,11 +8,10 @@ import services
 import models
 import random
 import hmac
-# Separar rotas por role para cliente, organizaodr e portaria
+
 router = APIRouter(prefix="/eventos", tags=["Eventos"])
 
 def check_cliente(current_user: models.User = Depends(get_current_user)):
-    """Verifica se o usuário é cliente"""
     if current_user.role != models.RoleEnum.cliente:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -21,7 +20,6 @@ def check_cliente(current_user: models.User = Depends(get_current_user)):
     return current_user
 
 def check_organizador(current_user: models.User = Depends(get_current_user)):
-    """Verifica usuário é organizador"""
     if current_user.role != models.RoleEnum.organizador:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -59,7 +57,6 @@ def list_events(db: Session = Depends(get_db)):
 
 @router.get("/{event_id}", response_model=schemas.EventResponse)
 def get_event(event_id: int, db: Session = Depends(get_db)):
-    """Busca detalhes de um evento específico"""
     event = db.query(models.Event).filter(models.Event.id == event_id).first()
     if not event:
         raise HTTPException(
@@ -70,9 +67,6 @@ def get_event(event_id: int, db: Session = Depends(get_db)):
 
 @router.get("/catalgo-externo")
 async def listar_catalogo(query: str = None):
-    """
-    Rota do organizador buscar os eventos
-    """
     resultados = await services.fetch_external_events(query)
     return {"data": resultados}
 
@@ -82,9 +76,6 @@ def reservar_ingresso(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(check_cliente)
 ):
-    """
-    Reserva um ingresso com trava de concorrência para evitar dupla venda.
-    """
     event = db.query(models.Event).filter(models.Event.id == event_id).with_for_update().first()
     
     if not event:
@@ -115,7 +106,6 @@ def reservar_ingresso(
 
 @router.post("/ingressos/{ticket_id}/checkout",response_model=schemas.TicketResponse)
 def checkout_simulado(ticket_id: int, db: Session = Depends(get_db),current_user: models.User = Depends(check_cliente)):
-    """ Simula o pagamento de uma reserva aprova boa parte do tempo mas rescusa aleatoriamente para testar o fluxo """
     ticket = db.query(models.Ticket).filter(models.Ticket.id == ticket_id, models.Ticket.cliente_id == current_user.id).with_for_update().first()
 
     if not ticket:
@@ -199,16 +189,11 @@ def compartilhar_evento_cliente(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(check_cliente)
 ):
-    """
-    Gera um link e texto para o cliente compartilhar o evento.
-    Acesso restrito apenas a clientes.
-    """
     evento = db.query(models.Event).filter(models.Event.id == event_id).first()
     
     if not evento:
         raise HTTPException(status_code=404, detail="Evento não encontrado")
         
-    # URL  do frontend
     link_publico = f"https://site.com/eventos/{evento.id}"
     
     texto_whatsapp = (
@@ -228,24 +213,13 @@ def listar_meus_eventos(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(check_organizador)
 ):
-    """
-    Retorna todos os eventos criados pelo organizador logado.
-    Ideal para o 'Painel do Organizador' no frontend.
-    """
     eventos = db.query(models.Event).filter(models.Event.organizador_id == current_user.id).all()
-    
     return eventos
-
 
 @router.get("/ingressos/meus-ingressos", response_model=List[schemas.TicketResponse])
 def listar_meus_ingressos(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(check_cliente)
 ):
-    """
-    Retorna todos os ingressos pertencentes ao cliente logado.
-    Ideal para a tela 'Meus Ingressos' no aplicativo/site do cliente.
-    """
     ingressos = db.query(models.Ticket).filter(models.Ticket.cliente_id == current_user.id).all()
-    
     return ingressos
