@@ -8,7 +8,7 @@ import PortariaHome from './pages/Portaria_home';
 import MeusIngressos from './pages/client/MeusIngressos';
 import ProtectedRoute from './components/ProtectedRoute';
 import EventoDetalhe from './pages/client/Eventos'; 
-
+import Checkout from './pages/client/Checkout';
 function App() {
   return (
     <>
@@ -22,6 +22,7 @@ function App() {
 
         <Route element={<ProtectedRoute allowedRoles={['cliente']} />}>
           <Route path="/meus-ingressos" element={<MeusIngressos />} />
+          <Route path="/checkout" element={<Checkout />} />
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={['organizador']} />}>
