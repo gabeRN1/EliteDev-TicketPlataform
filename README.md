@@ -1,8 +1,16 @@
 # Plataforma de Eventos e Ingressos - Desafio Elite Dev
 
-![GitHub repo size](https://img.shields.io/github/repo-size/gabeRN1/EliteDev-TicketPlataform?style=for-the-badge)
-![GitHub language count](https://img.shields.io/github/languages/count/gabeRN1/EliteDev-TicketPlataform?style=for-the-badge)
+<div align="center">
+  <!-- Badges das Tecnologias -->
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React">
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI">
+  <img src="https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite">
+  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel">
+</div>
 
+<br>
 <img src="imagem.png" alt="Exemplo imagem do projeto"> 
 
 > Sistema de gerenciamento de eventos e ingressos desenvolvido para o Desafio Elite Dev. A plataforma permite a criação de eventos via API externa, compra de ingressos com mapa de assentos ou quantidade, e validacao via QR Code na portaria.
