@@ -57,6 +57,16 @@ O projeto e uma aplicacao full-stack que resolve o fluxo completo de um evento. 
 * **Cliente**: Navega pelos eventos, reserva assentos, realiza pagamento simulado e recebe seu ingresso.
 * **Portaria**: Valida os ingressos na entrada do evento.
 
+### Credenciais de Teste
+Utilize as seguintes credenciais para acessar as diferentes visões do sistema.
+
+| Tipo de Usuário | E-mail | Senha | Role |
+| :--- | :--- | :--- | :--- |
+| **Organizador** | organizador@elitedev.com | `123456` | organizador |
+| **Cliente 1** | cliente1@elitedev.com | `123456` | cliente |
+| **Cliente 2** | cliente2@elitedev.com | `123456` | cliente |
+| **Portaria** | portaria@elitedev.com | `123456` | portaria |
+
 ## Requisitos do Sistema
 
 ### Requisitos Funcionais
